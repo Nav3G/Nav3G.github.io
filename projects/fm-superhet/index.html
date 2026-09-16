@@ -1132,7 +1132,7 @@
 <h4 id="local-oscillator-implementation">Local Oscillator Implementation<a class="headerlink" href="#local-oscillator-implementation" title="Permanent link">&para;</a></h4>
 <p><strong>Iteration 1 — BJT Clapp.</strong> I built the Clapp oscillator first using a KSP10 bipolar transistor exactly per the design of <span class="arithmatex">\(\S\)</span>4.1. This circuit started and oscillated reliably, but flatness was extremely poor, dropping by ~6 dB at the top of the band (118.7 MHz). Furthermore, harmonic suppression was ~10 dB at 98.7 MHz and rose to ~17 dB at 118.7 MHz. My initial instinct was that the tuning capacitor, being a cheap, general-purpose trimmer, was losing Q at the high end of the band. Swapping it out had no impact on either figure.</p>
 <figure>
-  <img src="../../../assets/fm-superhet/bjt-clapp-bench.jpg" alt="Bench Clapp (BJT)" style="max-width: 400px;">
+  <img src="../../../assets/fm-superhet/bjt-clapp-bench.JPG" alt="Bench Clapp (BJT)" style="max-width: 500px;">
   <figcaption>Bench prototype of a BJT-based Clapp oscillator.</figcaption>
 </figure>
 
@@ -1183,7 +1183,7 @@
 </table>
 <p>I struggle to explain why the resistor-loaded amplifier approach failed to produce anywhere near the gain I was expecting. It was even less clear why preceding the amp-follower chain with a follower right off the LO resulted in significant loss. Recall, I measured near-unity gain when measuring the LO signal off of a lone source follower. Nevertheless, loading the bare amp-follower with an RF choke finally amounted to tangible gain, in line with the theoretical predictions. However, I found that too large of a choke both hindered flatness yet again and reduced said gain. I can only assume that the choke formed some kind of resonant load with the JFET's internal capacitance or any stray board capacitance, resulting in the amplifier's gain peaking within a narrow frequency range.</p>
 <figure>
-  <img src="../../../assets/fm-superhet/jfet-clapp-bench-3.jpg" alt="Bench Clapp (JFET) with buffer" style="max-width: 500px;">
+  <img src="../../../assets/fm-superhet/jfet-clapp-bench-3.JPG" alt="Bench Clapp (JFET) with buffer" style="max-width: 500px;">
   <figcaption>Bench prototype of a JFET-based Clapp oscillator. A buffer-amplifier has been added to the circuit.</figcaption>
 </figure>
 
