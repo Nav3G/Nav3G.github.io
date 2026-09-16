@@ -1,0 +1,1331 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="FM superheterodyne receiver build, tools, and RF theory notes">
+      
+      
+      
+      
+        <link rel="prev" href="../..">
+      
+      
+        <link rel="next" href="../../tools/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>FM Superhet - Evan Gray — RF/EM Portfolio</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#fm-superheterodyne-receiver" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Evan Gray — RF/EM Portfolio" class="md-header__button md-logo" aria-label="Evan Gray — RF/EM Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Evan Gray — RF/EM Portfolio
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              FM Superhet
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  FM Superhet
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../tools/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Tools
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../notes/" class="md-tabs__link">
+          
+  
+  
+  Notes
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Evan Gray — RF/EM Portfolio" class="md-nav__button md-logo" aria-label="Evan Gray — RF/EM Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Evan Gray — RF/EM Portfolio
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FM Superhet
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FM Superhet
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#current-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#motivation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Motivation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-overview-for-a-superheterodyne-receiver" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture overview for a Superheterodyne Receiver
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#local-oscillator-and-mixer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local Oscillator and Mixer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Local Oscillator and Mixer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-oscillator-circuit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local Oscillator Circuit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mixer-circuit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mixer Circuit
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-oscillator-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local Oscillator Implementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mixer-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mixer implementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bench-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bench Check
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Bench Check">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-oscillator-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local Oscillator Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mixer-if-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mixer IF Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conclusion
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Notes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/mixer-theory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mixer Theory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/rf-measurement-parameters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RF Measurement Parameters
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#current-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#motivation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Motivation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-overview-for-a-superheterodyne-receiver" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture overview for a Superheterodyne Receiver
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#local-oscillator-and-mixer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local Oscillator and Mixer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Local Oscillator and Mixer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-oscillator-circuit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local Oscillator Circuit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mixer-circuit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mixer Circuit
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-oscillator-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local Oscillator Implementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mixer-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mixer implementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bench-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bench Check
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Bench Check">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-oscillator-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local Oscillator Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mixer-if-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mixer IF Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conclusion
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="fm-superheterodyne-receiver">FM Superheterodyne Receiver<a class="headerlink" href="#fm-superheterodyne-receiver" title="Permanent link">&para;</a></h1>
+<p>A full FM broadcast-band (88–108 MHz) superheterodyne receiver. The core blocks are: RF preselector, LO + mixer, IF diplexer + IF amplifiers, FM detector, audio stage. </p>
+<p>This writeup documents the overall architecture considerations and the design and implementation of the now complete front-end. The remaining elements of the receiver chain are in-progress.</p>
+<h2 id="current-architecture">Current architecture<a class="headerlink" href="#current-architecture" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>RF Preselector</strong> — Antenna into a broadband, tracking preselector, straight into the mixer's RF port. No RF amp stage — signal levels in downtown Chicago are strong enough that one isn't needed, and keeping a moderate RF swing into the mixer was a design goal.</li>
+<li><strong>Local oscillator</strong> — A JFET (J310) Clapp oscillator, buffered by an amp and follower stage, delivers a flat +6 dBm into the mixer across 98.7–118.7 MHz.</li>
+<li><strong>Mixer</strong> — Diode-ring mixer (1N5711 Schottky diodes, hand-wound trifilar transformers on FT50-61 toroids).</li>
+</ul>
+<h2 id="motivation">Motivation<a class="headerlink" href="#motivation" title="Permanent link">&para;</a></h2>
+<p>My passion for RF circuits and antennas is boundless. While my ultimate interests lie in microwave frequency, distributed-element design, I have such an appreciation for discrete, lumped-element transistor circuits in the radio domain. Not only are they wonderfully intricate bits of engineering capable of processing signals that oscillate a million times per second, but they serve as a critical stepping-stone into the RF domain. Many, if not all, of the ideas developed during the 60s and onwards in the analog RF realm translate directly into modern microwave engineering.</p>
+<p>This project, a discrete, lumped-element FM receiver, sits precisely at that stepping-stone. A superheterodyne FM receiver touches nearly every fundamental building block of RF engineering in miniature: an LC-tuned front-end for image rejection, a local oscillator and mixer for frequency translation, an IF filter and limiter chain, and finally FM demodulation. Each of these stages, built here with discrete BJTs or JFETs and hand-wound inductors, has a direct microwave analog, from microwave cavities to rat-race diode ring mixers.</p>
+<p>Walking through this receiver by hand, toiling with design approaches, and directly measuring build outcomes, are deliberate choices to internalize the physics and engineering intuition applicable at all wavelengths: gain, noise figure, stability, impedance matching, etc. The switch to the distributed-element world, then, becomes a far less jarring transition.</p>
+<p>My specific goals for this project are quite simple: to learn as much as I can about receiver architecture, measurement techniques and instrumentation, and RF circuit realization. In achieving these milestones, I just hope to be able to hear FM stations with decent quality. If I can do that, my general goal will have been met, with my more particular, pedagogical interests no doubt satisfied by proxy.</p>
+<h2 id="architecture-overview-for-a-superheterodyne-receiver">Architecture overview for a Superheterodyne Receiver<a class="headerlink" href="#architecture-overview-for-a-superheterodyne-receiver" title="Permanent link">&para;</a></h2>
+<p>Below is the block diagram for a fairly standard superheterodyne receiver. I say <em>fairly standard</em> because a more robust design will often use a low-noise amplification stage after the antenna to boost RF signal strength while setting the baseline for <strong>noise figure</strong>. My design forgoes this stage because I plan to receive in RF dense cities like LA and Chicago. In this sense, I expect the incoming RF to already be fairly healthy (if not too strong to require attenuation).</p>
+<figure>
+  <img src="../../../assets/fm-superhet/block-diagram.jpeg" alt="FM Superhet Block Diagram">
+  <figcaption>Simplified block diagram for the FM superheterodyne receiver.</figcaption>
+</figure>
+
+<p>An advantage of this LNA-less approach, outside of simplicity, is that the signal chain includes one fewer sources of nonlinear distortion. However, this design sacrifices sensitivity to weak signals and control over initial noise figure. For a homebrew design, these are acceptable trade-offs.</p>
+<p>Beyond this change, the full signal chain — of which this front end is the first stage — is textbook superhet:</p>
+<p><strong>Built:</strong></p>
+<ul>
+<li>RF preselector.</li>
+<li>Local oscillator + mixer.</li>
+</ul>
+<p><strong>Planned next:</strong></p>
+<ul>
+<li>IF filter (including an IF diplexer).</li>
+<li>IF amplifier chain (limiting, if possible).</li>
+<li>Detector.</li>
+<li>Audio stage.</li>
+</ul>
+<h2 id="local-oscillator-and-mixer">Local Oscillator and Mixer<a class="headerlink" href="#local-oscillator-and-mixer" title="Permanent link">&para;</a></h2>
+<p>In any superhet design, the <strong>local oscillator</strong> (LO) + <strong>mixer</strong> network is probably the most challenging circuit to implement and one of the most critical components of the front-end overall. Being early in the signal chain, any problems that arise in this block will invariably propagate through to the system output. In my design specifically, this is the first active block, and thus is especially limiting when it comes to reception quality. All in all, the mixer and LO blocks are notoriously complex in design and implement.</p>
+<p>For reference, a mixer converts RF into an <strong>intermediate frequency</strong> (IF) signal by multiplying it with a locally furnished LO signal, generating sum and difference products. The LO is synthesized by some kind of <strong>variable frequency oscillator</strong> (VFO) located nearby, while a deliberately nonlinear device or switching circuit provides the mixing action. Mathematically, an ideal mixer produces an output signal of the form</p>
+<div class="arithmatex">\[\begin{equation}
+    V_\text{out}(t) = \frac{kV_\text{lo}V_\text{rf}}{2}\big[\cos((\omega_\text{lo} - \omega_\text{rf})t) + \cos((\omega_\text{lo} + \omega_\text{rf})t)\big].
+\end{equation}\]</div>
+<p>In short, the mixer + LO block's primary function is to produce the desired IF signal, <span class="arithmatex">\(\omega_\text{IF} = \omega_\text{LO} \pm \omega_\text{RF}\)</span>. It is the case that both signal generation and signal conversion are arguably simple tasks to achieve in isolation, but very difficult to unify with even adequate performance.</p>
+<p>Speaking of performance, because our end-goal is a clean IF, we are concerned mostly with how the mixer behaves at its output. LO-side issues are less critical down the line, and can be tuned qualitatively. Practically, then, the most critical figure of merit in the design and evaluation of a mixer is <strong>conversion gain</strong>, given by</p>
+<div class="arithmatex">\[\begin{equation}
+    \text{Conversion Gain (dB)} = 10\log_{10}\!\left(\frac{P_\text{IF}}{P_\text{RF}}\right).
+\end{equation}\]</div>
+<p>It is important to optimize around this quantity because it sets a limit on the overall system's noise figure. That is, any noise introduced in this early stage dominates the entire system's performance. Furthermore, the lower the conversion gain, the more likely it is a weak signal will become buried in the noise floor and thus impossible to later recover. </p>
+<p>A secondary, but equally relevant figure is <strong>third-order intercept point</strong> (IP3). This is a good measure of a mixer's unintended nonlinearity at the RF port, prior to the mixing action. We write</p>
+<div class="arithmatex">\[\begin{equation}
+    \text{IP3}_\text{out} = P_\text{fundamental} + \frac{P_\text{fundamental} - P_\text{IMD3}}{2}.
+\end{equation}\]</div>
+<p>Critically, third-order premixing of the RF signal can result in <em>ghost</em> frequencies appearing at the RF port which are extremely close to the genuine RF. These <strong>spurious signals</strong> can then mix down to the IF band, becoming impossible to filter out.</p>
+<p>For more details on the theory of mixers and oscillators, refer to the <strong><a href="../../notes/mixer-theory/">Mixer Theory</a></strong> and <strong>Oscillator Theory</strong> sections on the notes page. Additional information on measurement figures can be found in the <strong><a href="../../notes/rf-measurement-parameters/">RF Measurement Parameters</a></strong> section.</p>
+<h3 id="design">Design<a class="headerlink" href="#design" title="Permanent link">&para;</a></h3>
+<h4 id="local-oscillator-circuit">Local Oscillator Circuit<a class="headerlink" href="#local-oscillator-circuit" title="Permanent link">&para;</a></h4>
+<p>Starting with the LO circuit, my aim was a relatively flat and strong drive across the highside FM band (98.7 to 118.7 MHz). Regardless of the chosen mixer topology, a decent output level would be necessary, and flatness ensures the mixer's drive requirement is met consistently.</p>
+<p>Even before starting this project, I had long been familiar with the <strong>Clapp</strong> topology, having built the circuit a few times at HF. This circuit provides greater stability over a wider band as compared with its Colpitts and Hartley predecessors. Achieving this significant improvement only requires the addition of a single, third capacitor (C3), which often doubles as the tuning element. Furthermore, I wished for the active circuit to be in common-collector or common-drain configuration for lowered output impedance and more uniform loop gain. Overall, I considered two variations of this circuit:</p>
+<ul>
+<li><strong>BJT (KSP10)</strong> active device — A bipolar transistor gives greater loop gain and, therefore, startup margin. It also provides greater raw LO drive. However, bandwidth can be limited at VHF, and base loading effects can perturb the reactive network.</li>
+</ul>
+<figure>
+  <img src="../../../assets/fm-superhet/bjt-clapp-topology.jpeg" alt="BJT Clapp" style="max-width: 400px;">
+  <figcaption>BJT Clapp oscillator circuit diagram.</figcaption>
+</figure>
+
+<ul>
+<li><strong>JFET (J310)</strong> active device — While a FET suffers in terms of startup margin due to its relatively lower transconductance, it shines in other areas. The J310 is generally superior at VHF and UHF with its higher transition frequency. Also, a FET has nearly zero gate loading effects on the resonant tank. Moreover, while biasing can be somewhat tedious due to process inconsistencies, the circuit requires fewer components overall.</li>
+</ul>
+<figure>
+  <img src="../../../assets/fm-superhet/jfet-clapp-topology.jpeg" alt="JFET Clapp" style="max-width: 400px;">
+  <figcaption>JFET Clapp oscillator circuit diagram.</figcaption>
+</figure>
+
+<p>Both circuits are nearly identical. They share a startup condition, given by</p>
+<div class="arithmatex">\[\begin{equation}
+    g_m \ge \omega^2C_1C_2R_p,
+\end{equation}\]</div>
+<p>where <span class="arithmatex">\(R_p\)</span> is the effective tank loss (dominated by the inductor's effective series resistance). As stated above, the JFET has a lower transconductance, and thus has a tighter startup margin. To counteract this, we place an RF choke in the source leg to pin the source current to <span class="arithmatex">\(I_S \approx I_{DSS}\)</span>. For the BJT approach, this issue is rarely encountered, and the startup condition is often easily met with a prudent choice of <span class="arithmatex">\(C_1\)</span> and <span class="arithmatex">\(C_2\)</span>. </p>
+<p>To attain the desired tuning range, the tank can be viewed as a series resonator. It is beneficial to choose <span class="arithmatex">\(C_1 = C_2 &gt; C_3\)</span> for wideband stability. Then, the oscillator frequency is given by</p>
+<div class="arithmatex">\[\begin{equation}
+    f = \frac{1}{2\pi\sqrt{L_1\cdot C_\text{eff}}}, \quad C_\text{eff} = \frac{1}{\frac{1}{C_1} + \frac{1}{C_2} + \frac{1}{C_3}}.
+\end{equation}\]</div>
+<p>For a detailed analysis of this circuit topology and the origin of these equations, read <strong>Clapp Oscillator Small-Signal Analysis and Design</strong>.</p>
+<p>In the case of this project's design, I ended up choosing the JFET since its near-zero loading on the tank mattered more to me than the BJT's superior startup margin. Also, the J310 is a well established VHF device, giving me more confidence in broadband flatness compared to the BJTs I had in my parts bin.</p>
+<p>Because I ended up choosing a passive commutating circuit for the mixer core (more on this in the mixer section below), amplification of the LO drive would become unavoidable for good conversion performance. Specifically, with the LO expected to provide unity gain at a 50 <span class="arithmatex">\(\Omega\)</span> reference impedance, an amplification stage sized for a gain of roughly +7 dB was necessary to meet the mixer's requirements. Further, given an oscillator's sensitivity to <strong>load pulling</strong> and reactive perturbations, output buffering is vital. A JFET source follower was chosen for its massive gate impedance and simplicity. Below is the full LO circuit with these inclusions considered.</p>
+<figure>
+  <img src="../../../assets/fm-superhet/lo-circuit.jpeg" alt="LO Circuit">
+  <figcaption>Final local oscillator circuit.</figcaption>
+</figure>
+
+<p>The output impedance of this circuit was tuned to 50 <span class="arithmatex">\(\Omega\)</span> for driving the mixer port. Estimating the device's transconductance to be <span class="arithmatex">\(g_m \approx 12\)</span> mS, and employing a 100 <span class="arithmatex">\(\Omega\)</span> source resistor in the follower stage, the output impedance is</p>
+<div class="arithmatex">\[\begin{equation}
+    \frac{1}{g_m}\,||\,100\,\Omega \approx 45\,\Omega.
+\end{equation}\]</div>
+<p>This is a good analytic estimate, adjusted on the bench to meet the target impedance.</p>
+<p>Evidently, a few modifications have been made to the LO circuit (added diode, swapping <span class="arithmatex">\(L_1\)</span> and <span class="arithmatex">\(C_3\)</span>), each of which came out of empirical iteration; see the implementation section. </p>
+<h4 id="mixer-circuit">Mixer Circuit<a class="headerlink" href="#mixer-circuit" title="Permanent link">&para;</a></h4>
+<p>The mixer topology for the downconversion network varied significantly throughout the planning process. My key requirements were maximized conversion gain, so as to avoid excessive IF amplification, and acceptable LO-RF isolation. I considered the following options:</p>
+<ul>
+<li><strong>Single JFET mixer</strong> — The core advantage of using a JFET for mixing is that it provides conversion gain, one of my primary requirements. It is also a simple device to bias and operate. Furthermore, transistors can be loaded by a tuned circuit for immediate selectivity and output coupling/impedance transformation. However, single-device mixers tend to have extremely poor isolation. They can also be somewhat bandwidth limited, especially if input matching isn't already broadband. Lastly, because these kinds of mixers rely on their nonlinear (second-order) behavior, third-order intermodulation becomes more of a concern.</li>
+</ul>
+<figure>
+  <img src="../../../assets/fm-superhet/single-jfet-mixer-topology.jpeg" alt="1 JFET Mixer" style="max-width: 400px;">
+  <figcaption>Single JFET mixer circuit.</figcaption>
+</figure>
+
+<ul>
+<li><strong>Dual-gate MOSFET mixer</strong> — The dual-gate MOSFET has essentially the same advantages and disadvantages as the single JFET mixer. However, it has significantly improved isolation, owing to simultaneous gate injection. Nevertheless, high-frequency junction capacitances will always contribute to reverse coupling, as with any semiconducting device.</li>
+</ul>
+<figure>
+  <img src="../../../assets/fm-superhet/dual-gate-mosfet-mixer-topology.jpeg" alt="MOSFET Mixer" style="max-width: 400px;">
+  <figcaption>Dual-gate MOSFET mixer circuit.</figcaption>
+</figure>
+
+<ul>
+<li><strong>Diode ring mixer</strong> — The classic diode ring solves many of the problems posed by nonlinear, single-device mixers. Critically, they are balanced networks and rely on commutation/current steering for mixing, rather than inherent device nonlinearity. These two properties give them excellent isolation in all directions, superior linearity, and wide bandwidth. Furthermore, they are relatively simple to build, requiring only 4 diodes and a pair of trifilar transformers. The price that must be paid for these conveniences and  benefits is significant LO drive to fully switch the diodes, and unavoidable conversion loss. Additionally, the 4 diodes must be closely matched.</li>
+</ul>
+<figure>
+  <img src="../../../assets/fm-superhet/diode-ring-mixer-topology.jpeg" alt="Diode Ring mixer" style="max-width: 500px;">
+  <figcaption>Diode ring mixer circuit.</figcaption>
+</figure>
+
+<p>I went back and forth with all of these variations during the planning stage of this project. The diode ring mixer would have been my first choice, but I had, at the time, never wound transformers, and had no VHF toroid on hand. The JFET mixer was an attractive, simple approach that I was sure I would eventually pick. However, I grew more and more concerned with its poor LO-RF isolation, especially given that I can't risk broadcasting any FM whatsoever. I eventually landed on the dual-gate MOSFET mixer, it being a well-documented circuit in the amateur HF-band community, and one that solves the reverse isolation issues somewhat. But, again, I grew concerned with its performance at VHF; besides the fact I had no dual-gate MOSFETS on hand. </p>
+<p>Ultimately, I returned to and settled on the diode ring. It is one of the easier circuits to physically build, requiring only that I wind my own trifilar transformers and hand-match a set of 4 diodes. At the same time, it provides excellent performance, rivaling even professional implementations at the cost of a single amplification stage in the LO chian (see the LO circuit section). Below are the diode and winding specifications:</p>
+<ul>
+<li>Diodes: 1N5711; fast-switching, high-frequency, low turn-on voltage Schottky diodes. These were matched to within 1 mV of one another (each with 0.280 V forward drop) using a basic multimeter. Purchased on Amazon.</li>
+<li>Transformers: 3-4 turns of 26 AWG wire, trifilar wound. Three strands of 6-inch long wire twisted together at 4-8 twists-per-inch. FT50-61 toroid, which functions well for transformers up to 400 MHz. Purchased on Amazon.</li>
+</ul>
+<h3 id="implementation">Implementation<a class="headerlink" href="#implementation" title="Permanent link">&para;</a></h3>
+<p>With the design settled on paper, actually bringing the LO circuit up on the bench told a different story. Several of the choices above only emerged after some back-and-forth. The oscillator itself needed a handful of fixes before it behaved, and getting flat gain into the mixer took a separate round of trial and error on the buffer chain. The mixer itself was a relatively smooth process.</p>
+<h4 id="local-oscillator-implementation">Local Oscillator Implementation<a class="headerlink" href="#local-oscillator-implementation" title="Permanent link">&para;</a></h4>
+<p><strong>Iteration 1 — BJT Clapp.</strong> I built the Clapp oscillator first using a KSP10 bipolar transistor exactly per the design of <span class="arithmatex">\(\S\)</span>4.1. This circuit started and oscillated reliably, but flatness was extremely poor, dropping by ~6 dB at the top of the band (118.7 MHz). Furthermore, harmonic suppression was ~10 dB at 98.7 MHz and rose to ~17 dB at 118.7 MHz. My initial instinct was that the tuning capacitor, being a cheap, general-purpose trimmer, was losing Q at the high end of the band. Swapping it out had no impact on either figure.</p>
+<figure>
+  <img src="../../../assets/fm-superhet/bjt-clapp-bench.jpg" alt="Bench Clapp (BJT)" style="max-width: 400px;">
+  <figcaption>Bench prototype of a BJT-based Clapp oscillator.</figcaption>
+</figure>
+
+<p><strong>Iteration 2 — swap to JFET.</strong> I then reached for a more reliable VHF device, the J310 JFET, hoping it would provide improved gain performance. JFETs are also known to be excellent active devices for oscillators, owing to their low noise figure and high gate impedance. Initially, I just dropped the JFET directly in place of the BJT and replaced the base divider with a 1 M<span class="arithmatex">\(\Omega\)</span> resistor for rebiasing. The circuit initially failed to oscillate. I quickly realized that the JFET's lower transconductance hindered startup margin, so I replaced the source resistor with a large RF choke. Oscillations then initialized reliably, at the expense of massive source currents in the 33 mA range (my J310's <span class="arithmatex">\(I_{DSS}\)</span>). Ultimately, gain droop reduced to ~4 dB at the top of the band, and harmonic suppression improved by ~8 dB across the band (still uneven, but overall better).</p>
+<p><strong>Iteration 3 — addition of AGC diode.</strong> I decided to reference <em>Solid-State Design for the Radio Amateur</em> for improvements to the oscillator circuit. I noticed that in nearly every oscillator this book discussed, a silicon diode was placed across the tank circuit, from gate to ground. Such a diode acts as a passive kind of <strong>automatic gain control</strong>. When the diode is run into conduction by excessive voltage swing, the inherent RC characteristic of the gate (bias resistor and input capacitance) work to shift the DC operating point and reduce gain. It also seems to significantly reduce the device's overall operating current, ensuring it never enters saturation, improving harmonic distortion. Upon adding this diode (1N4148), both flatness and harmonic suppression improved to ~3 dB and ~25 dB across the band, respectively. Note that it was necessary to reduce the gate resistor from 1 M<span class="arithmatex">\(\Omega\)</span> to 47-100 k<span class="arithmatex">\(\Omega\)</span> to achieve this result.</p>
+<figure>
+  <img src="../../../assets/fm-superhet/jfet-clapp-bench.jpg" alt="Bench Clapp (JFET)" style="max-width: 500px;">
+  <figcaption>Bench prototype of a JFET-based Clapp oscillator. A diode is now placed across the resonant circuit and a source follower has been added.</figcaption>
+</figure>
+
+<p>Observe that a source follower has also been added to the circuit. This was purely for testing purposes. I wished to prevent the possibility of loading-down the oscillator with my measurement device. I also wanted to obtain proper 50 <span class="arithmatex">\(\Omega\)</span> measurements, since that is roughly what the diode ring presents. Furthermore, it was at this point that I decided for my output coupling capacitor to be ~5 pF so as to ensure a light tap of the tank (source node).</p>
+<p><strong>Iteration 4 — L1/C3 swap.</strong> I had noticed throughout testing and sweeping the trimmer that while harmonics remained suppressed, some of the LO's flatness would suffer. This was clearest after dropping in the source follower. Indeed, it was my suspicion that solely adding the AGC diode was not a complete solution. Namely, it had been a constant concern of mine that the tuning capacitor was also the very capacitor coupling the resonant circuit to the active device. Furthermore, I had in my own experience, as well as in the aforementioned solid-state radio textbook, observed many oscillator designs use a fixed coupling capacitor alongside a larger tuning network in parallel with the inductor. Other designs simply place the inductor ahead of the capacitor in the series chain. I attempted the latter approach and this significantly improved flatness.</p>
+<figure>
+  <img src="../../../assets/fm-superhet/jfet-clapp-bench-2.jpg" alt="Bench Clapp (JFET) LC swap" style="max-width: 500px;">
+  <figcaption>Bench prototype of a JFET-based Clapp oscillator. The tank inductor and trimmer capacitor have been swapped.</figcaption>
+</figure>
+
+<p>With the oscillator itself behaved, the remaining problem was absolute gain and isolation into the mixer. I tried several amp/follower orderings in the buffer chain:</p>
+<table>
+<thead>
+<tr>
+<th>Configuration</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Amp → Follower</td>
+<td>Minimal gain present, flatness poor.</td>
+</tr>
+<tr>
+<td>Follower → Amp</td>
+<td>Unexpected loss instead of gain.</td>
+</tr>
+<tr>
+<td>Amp → Follower (choke-loaded)</td>
+<td>Hit target gain, flatness still off.</td>
+</tr>
+<tr>
+<td>Follower → Amp → Follower</td>
+<td>Loss again.</td>
+</tr>
+<tr>
+<td>Amp → Follower, RFC retuned</td>
+<td><strong>Flat +6 dBm into mixer — final</strong>.</td>
+</tr>
+</tbody>
+</table>
+<p>I struggle to explain why the resistor-loaded amplifier approach failed to produce anywhere near the gain I was expecting. It was even less clear why preceding the amp-follower chain with a follower right off the LO resulted in significant loss. Recall, I measured near-unity gain when measuring the LO signal off of a lone source follower. Nevertheless, loading the bare amp-follower with an RF choke finally amounted to tangible gain, in line with the theoretical predictions. However, I found that too large of a choke both hindered flatness yet again and reduced said gain. I can only assume that the choke formed some kind of resonant load with the JFET's internal capacitance or any stray board capacitance, resulting in the amplifier's gain peaking within a narrow frequency range.</p>
+<figure>
+  <img src="../../../assets/fm-superhet/jfet-clapp-bench-3.jpg" alt="Bench Clapp (JFET) with buffer" style="max-width: 500px;">
+  <figcaption>Bench prototype of a JFET-based Clapp oscillator. A buffer-amplifier has been added to the circuit.</figcaption>
+</figure>
+
+<h4 id="mixer-implementation">Mixer implementation<a class="headerlink" href="#mixer-implementation" title="Permanent link">&para;</a></h4>
+<p>Rather unexpectedly, building and installing the mixer was a fairly smooth process. This was my first time winding a transformer, so I followed a classic approach mentioned in the aforementioned textbooks:</p>
+<ul>
+<li>First, the trifilar wire needed to be twisted together to ensure even and meaningful coupling. I took 3 ~6 inch strands of 26 AWG enameled wire and pressed their ends into a drill socket while holding the loose ends with pliers. I then ran the drill slowly until I observed 4-8 twist per inch develop along the set of wires.</li>
+<li>Next, I prepared my toroid by feeding a paint brush through its center and mounting it in a vice. I then passed the trifilar wire bundle into the center hole 4 times, resulting in 4 loops. Each end of the wire triple resided on opposite sides of the toroid. </li>
+<li>Finally, I untwisted the loose ends, stripped their enamel coatings, and checked continuity to match the individual wires. At this point, all that remained was to form the center-tap by finding two distinct wire ends, each on <strong>opposite</strong> sides of the toroid, and twist them together.</li>
+</ul>
+<figure>
+  <img src="../../../assets/fm-superhet/trifilar-toroids.jpg" alt="Trifilar-wound transformers" style="max-width: 500px;">
+  <figcaption>Trifilar-wound toroidal transformers with center-tap realized.</figcaption>
+</figure>
+
+<p>The choice of 4 turns arises from the rule-of-thumb that the external port, in this case the LO or RF, should present several times the impedance of the network, the diode ring, at the center frequency. Since the diode ring is expected to present ~50 <span class="arithmatex">\(\Omega\)</span>, 4 turns is a reasonable choice. Of course, the diode ring presents a dynamic impedance, so this is only a rough estimate.</p>
+<p>With the transformers ready, all that was left was to match 4 diodes and to build the circuit. Indeed, using a simply bench multimeter, I matched several diodes to 280 mV exactly. This ensures even switching across the LO swing, as well as a somewhat more balanced impedance profile.</p>
+<figure>
+  <img src="../../../assets/fm-superhet/mixer-LO-final.jpg" alt="Final Mixer + LO circuit" style="max-width: 500px;">
+  <figcaption>Finalized board with the diode-ring mixer implemented.</figcaption>
+</figure>
+
+<p>Because this is now a cascaded system, specific details as to the performance of the mixer are presented in the following section.</p>
+<h3 id="bench-check">Bench Check<a class="headerlink" href="#bench-check" title="Permanent link">&para;</a></h3>
+<p>While several intermediate measurements were conducted during the implementation of the front-end, this section presents the key output figures. </p>
+<h4 id="local-oscillator-results">Local Oscillator Results<a class="headerlink" href="#local-oscillator-results" title="Permanent link">&para;</a></h4>
+<p>Below is the spectrum of the buffered and amplified LO signal. Critically, the fundamental power level remains within 1 dB across the tuning range. While it is not visible on the static plot, the LO gain is monotonic throughout the span.</p>
+<p>Furthermore, the output level sits right around 5-6 dB (add 30 dB to the plot markers), only just below a standard diode-ring mixer's requirements. Nevertheless, 6 dB is approximately 0.45 V in a 50 <span class="arithmatex">\(\Omega\)</span> system, which is more than adequate to properly switch a 0.28 V diode. </p>
+<p>We also see that the second harmonic lies 20-22 dB below the fundamental uniformly. Not only is this already a very acceptable level of harmonic distortion, but a balanced mixer is expected to significantly suppress even-order harmonics, further improving performance.</p>
+<figure>
+  <img src="../../../assets/fm-superhet/amp-follow-plots.png" alt="LO Output" style="max-width: 500px;">
+  <figcaption>LO output spectrum at the buffer-amplifier port. A 30 dB attenuator is in-line.</figcaption>
+</figure>
+
+<p>This data meets my original target specifications almost exactly. In the future, I would only budget for a drive level that slightly exceeds the mixer's specifications.</p>
+<h4 id="mixer-if-results">Mixer IF Results<a class="headerlink" href="#mixer-if-results" title="Permanent link">&para;</a></h4>
+<p>Finally, the plot below illustrates the IF port spectrum given a -5 dB, 40 MHz RF input tone, from which several key parameters can be extracted. The most important qualitative feature of the spectrum is the two distinct sidebands residing at the LO-to-RF sum and difference frequencies. These peaks indicate that second-order mixing has been achieved at some level. More specifically, we measure a ~-10 dB (add 30 dB to the plot markers) low-side IF at both band edges, implying a conversion loss of ~5 dB. This is an excellent result, exceeding my initial specifications and expectations.</p>
+<p>Additionally, the data indicates ~28 dB of LO-to-IF isolation and ~40 dB of RF-to-IF isolation. These are also excellent results, and they align with the reputation of the diode-ring mixer.</p>
+<p>The 2nd LO harmonic is suppressed by ~51 dB, as was predicted in the preceding LO results section. While not on this plot, the 3rd harmonic is almost equally suppressed, though only because it was never inherently strong.</p>
+<figure>
+  <img src="../../../assets/fm-superhet/mixer-output.png" alt="IF Output" style="max-width: 500px;">
+  <figcaption>Mixer output spectrum at the IF port. A 30 dB attenuator is in-line.</figcaption>
+</figure>
+
+<p>As with the LO circuit, the mixer data meets, if not totally exceeds, the design specifications.</p>
+<h4 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LO output level</td>
+<td>+5–6 dBm, flat within 1 dB across 98.7–118.7 MHz</td>
+</tr>
+<tr>
+<td>LO harmonic suppression</td>
+<td>20–22 dB below fundamental</td>
+</tr>
+<tr>
+<td>Mixer conversion loss</td>
+<td>~5 dB (measured at band edges)</td>
+</tr>
+<tr>
+<td>LO-to-IF isolation</td>
+<td>~28 dB</td>
+</tr>
+<tr>
+<td>RF-to-IF isolation</td>
+<td>~40 dB</td>
+</tr>
+<tr>
+<td>2nd LO harmonic (at IF port)</td>
+<td>~51 dB suppressed</td>
+</tr>
+</tbody>
+</table>
+<h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">&para;</a></h2>
+<p>With these results, the RF front-end is complete and meets its original design targets across the board. The next stage — IF filtering, amplification, and detection — picks up directly from the mixer's IF port demonstrated here. Even as a standalone milestone, this front-end already exercises the core skills I set out to develop: oscillator design, mixer topology selection, transformer winding, and firsthand RF measurement.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.top", "navigation.instant", "toc.follow", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+        <script src="../../javascripts/toc-numbering.js"></script>
+      
+    
+  </body>
+</html>

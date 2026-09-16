@@ -1,0 +1,2203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Smith Bench</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root{
+  --app-bg:#12161A;
+  --panel:#1B2127;
+  --panel-raised:#222933;
+  --divider:#2E353D;
+  --text:#D8D3C4;
+  --text-dim:#8B9199;
+  --paper:#F5F0E3;
+  --ink:#1C2A3A;
+  --ink-strong:#101820;
+  --label-ink:#5B6B7A;
+  --focus:#4A5FA5;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--app-bg);font-family:'Inter',system-ui,sans-serif;color:var(--text);}
+
+.app{display:flex;height:100vh;}
+
+.sidebar{
+  width:380px;min-width:280px;max-width:640px;flex-shrink:0;background:var(--panel);
+  border-right:1px solid var(--divider);
+  padding:22px 20px 40px;overflow-y:auto;
+}
+
+.resize-handle{
+  width:7px;flex-shrink:0;cursor:col-resize;position:relative;background:transparent;
+}
+.resize-handle::before{
+  content:'';position:absolute;left:3px;top:0;bottom:0;width:1px;background:var(--divider);
+}
+.resize-handle:hover::before, .resize-handle.dragging::before{background:var(--focus);width:2px;left:2.5px;}
+
+.brand{margin-bottom:22px;}
+.brand h1{font-size:16px;font-weight:600;margin:0 0 3px;letter-spacing:0.2px;}
+.brand p{font-size:12px;color:var(--text-dim);margin:0;line-height:1.4;}
+
+.edit-banner{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  background:#3A2F1C;border:1px solid #6B5323;border-radius:5px;
+  padding:8px 10px;margin-bottom:18px;font-size:12px;color:#E8C878;
+}
+.edit-cancel{
+  background:none;border:1px solid #6B5323;color:#E8C878;border-radius:4px;
+  padding:3px 8px;font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;flex-shrink:0;
+}
+.edit-cancel:hover{background:#4A3B22;}
+
+.cursor-readout{
+  width:100%;max-width:960px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;
+  color:var(--text-dim);background:var(--panel-raised);border:1px solid var(--divider);
+  border-radius:4px;padding:7px 12px;margin-bottom:10px;
+}
+.cursor-readout b{color:var(--text);font-weight:500;}
+
+.field-row{display:flex;gap:8px;margin-bottom:14px;}
+.field{flex:1;}
+.field label{display:block;font-size:11px;color:var(--text-dim);margin-bottom:4px;}
+.field input, .field select{
+  width:100%;background:var(--panel-raised);border:1px solid var(--divider);
+  color:var(--text);border-radius:4px;padding:6px 8px;font-size:13px;
+  font-family:'IBM Plex Mono',monospace;
+}
+.field input:focus, .field select:focus{outline:none;border-color:var(--focus);}
+
+hr.div{border:none;border-top:1px solid var(--divider);margin:18px 0;}
+
+.section-title{font-size:12px;font-weight:600;color:var(--text);margin:0 0 10px;}
+
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+.tab{
+  background:var(--panel-raised);border:1px solid var(--divider);color:var(--text-dim);
+  font-size:11.5px;padding:6px 10px;border-radius:20px;cursor:pointer;font-family:'Inter',sans-serif;
+}
+.tab.active{background:var(--focus);border-color:var(--focus);color:#F5F0E3;}
+
+.form-panel{display:none;}
+.form-panel.active{display:block;}
+
+.radio-row{display:flex;gap:14px;margin-bottom:12px;font-size:12px;}
+.radio-row label{display:flex;align-items:center;gap:5px;color:var(--text-dim);cursor:pointer;}
+
+.swatches{display:flex;gap:7px;margin-bottom:14px;}
+.swatch{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
+.swatch.selected{border-color:#F5F0E3;}
+
+.btn{
+  width:100%;background:var(--focus);color:#F5F0E3;border:none;border-radius:5px;
+  padding:9px 10px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;
+}
+.btn:hover{filter:brightness(1.08);}
+.btn.secondary{background:var(--panel-raised);border:1px solid var(--divider);color:var(--text);}
+
+.readout{
+  margin-top:10px;font-size:11.5px;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;
+  background:var(--panel-raised);border:1px solid var(--divider);border-radius:4px;padding:8px 10px;line-height:1.6;
+  display:none;
+}
+.readout.show{display:block;}
+.readout.warn{background:#3A2320;border-color:#7A3B32;color:#E8A898;}
+
+.note{font-size:11px;color:var(--text-dim);line-height:1.5;margin-top:10px;}
+.note code{font-family:'IBM Plex Mono',monospace;background:var(--panel-raised);border-radius:3px;padding:1px 4px;color:var(--text);}
+
+.item-list{margin-top:6px;}
+.item-row{
+  display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid var(--divider);font-size:12px;
+  cursor:pointer;border-radius:4px;
+}
+.item-row:hover{background:var(--panel-raised);}
+.item-row.editing{background:#3A2F1C;}
+.item-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.item-label{flex:1;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.item-meta{color:var(--text-dim);font-size:10.5px;font-family:'IBM Plex Mono',monospace;}
+.item-del{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;line-height:1;padding:2px 4px;}
+.item-del:hover{color:#C4562D;}
+
+.canvas-wrap{flex:1;display:flex;flex-direction:column;align-items:center;padding:28px 24px 40px;overflow:auto;}
+.toolbar{width:100%;max-width:960px;display:flex;gap:10px;align-items:center;margin-bottom:8px;flex-wrap:wrap;}
+.toolbar-group{display:flex;align-items:center;gap:8px;padding-left:12px;border-left:1px solid var(--divider);}
+.toolbar-group:first-child{padding-left:0;border-left:none;}
+.toolbar input{
+  background:var(--panel-raised);border:1px solid var(--divider);color:var(--text);
+  border-radius:4px;padding:7px 10px;font-size:13px;font-family:'Inter',sans-serif;
+}
+.toolbar input#chartTitle{flex:1;min-width:160px;font-weight:500;}
+.toolbar .spacer{flex:1;}
+.toolbar-btn{
+  background:var(--panel-raised);border:1px solid var(--divider);color:var(--text);
+  border-radius:4px;padding:7px 12px;font-size:12.5px;cursor:pointer;font-family:'Inter',sans-serif;
+}
+.toolbar-btn:hover{border-color:var(--focus);}
+
+.paper-toggle{display:flex;border:1px solid var(--divider);border-radius:4px;overflow:hidden;}
+.paper-btn{
+  background:var(--panel-raised);border:none;color:var(--text-dim);
+  padding:7px 12px;font-size:12.5px;cursor:pointer;font-family:'Inter',sans-serif;
+}
+.paper-btn + .paper-btn{border-left:1px solid var(--divider);}
+.paper-btn.active{background:var(--focus);color:#F5F0E3;}
+
+.shade-toggle{
+  display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-dim);
+  font-family:'Inter',sans-serif;cursor:pointer;user-select:none;
+}
+.shade-toggle input{accent-color:var(--focus);cursor:pointer;}
+
+.collapsible{
+  border:1px solid var(--divider);border-radius:5px;margin-bottom:14px;overflow:hidden;background:var(--panel-raised);
+}
+.collapsible summary{
+  padding:8px 10px;font-size:12.5px;font-weight:500;color:var(--text);cursor:pointer;
+  list-style:none;display:flex;align-items:center;justify-content:space-between;user-select:none;
+}
+.collapsible summary::-webkit-details-marker{display:none;}
+.collapsible summary::after{content:'▸';color:var(--text-dim);font-size:10px;transition:transform 0.15s;}
+.collapsible[open] summary::after{transform:rotate(90deg);}
+.collapsible summary:hover{background:rgba(255,255,255,0.03);}
+.collapsible-body{padding:2px 10px 10px;border-top:1px solid var(--divider);}
+.collapsible-body .field-row:first-child{margin-top:10px;}
+
+svg#chart{width:100%;max-width:960px;max-height:82vh;height:auto;background:var(--paper);border-radius:3px;box-shadow:0 2px 10px rgba(0,0,0,.45);cursor:grab;touch-action:none;}
+svg#chart:active{cursor:grabbing;}
+.readout-row{width:100%;max-width:960px;display:flex;align-items:baseline;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.readout-row .cursor-readout{margin-bottom:0;flex:1;min-width:220px;}
+.zoom-hint{color:var(--text-dim);opacity:0.6;font-size:10.5px;white-space:nowrap;}
+
+@media (max-width:820px){
+  html,body{overflow:auto;height:auto;}
+  .app{flex-direction:column;height:auto;}
+  .sidebar{width:100% !important;border-right:none;border-bottom:1px solid var(--divider);overflow-y:visible;max-height:none;}
+  .resize-handle{display:none;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <h1>Smith Bench</h1>
+      <p>Plot stability, gain, and VSWR circles directly on a Smith chart — type in values, export the figure.</p>
+    </div>
+
+    <div class="edit-banner" id="editBanner" style="display:none;">
+      <span id="editBannerText">Editing item</span>
+      <button class="edit-cancel" onclick="endEdit(); renderAll();">Cancel</button>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Z₀ reference (Ω)</label>
+        <input type="number" id="z0" value="50" step="1">
+      </div>
+    </div>
+
+    <hr class="div">
+    <p class="section-title">Add to chart</p>
+
+    <div class="tabs">
+      <div class="tab active" data-mode="stability">Stability circle</div>
+      <div class="tab" data-mode="gain">Gain circle</div>
+      <div class="tab" data-mode="stub">Stub match</div>
+      <div class="tab" data-mode="circle">Circle (Γ)</div>
+      <div class="tab" data-mode="vswr">VSWR circle</div>
+      <div class="tab" data-mode="point">Point</div>
+      <div class="tab" data-mode="line">Line</div>
+    </div>
+
+    <!-- SHARED S-PARAMETERS (stability + gain circles both read from these) -->
+    <div id="sparamBlock">
+      <details class="collapsible">
+        <summary>Import Touchstone (.s2p)</summary>
+        <div class="collapsible-body">
+          <div class="field-row" style="align-items:flex-end;">
+            <div class="field">
+              <label>Choose file</label>
+              <input type="file" id="s2pFile" accept=".s2p,.S2P,.txt">
+            </div>
+          </div>
+          <div class="field-row" id="s2pFreqRow" style="display:none;">
+            <div class="field">
+              <label>Frequency point</label>
+              <select id="s2pFreqSelect"></select>
+            </div>
+          </div>
+          <button class="btn secondary" id="s2pLoadBtn" style="display:none;margin-bottom:6px;" onclick="loadS2pPoint()">Load into fields below</button>
+          <p class="note" id="s2pStatus" style="display:none;margin-top:0;"></p>
+        </div>
+      </details>
+      <div class="field-row">
+        <div class="field"><label>|S11|</label><input type="number" id="s11m" value="0.85" step="0.01"></div>
+        <div class="field"><label>∠S11 (°)</label><input type="number" id="s11a" value="-60" step="1"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>|S21|</label><input type="number" id="s21m" value="3.2" step="0.01"></div>
+        <div class="field"><label>∠S21 (°)</label><input type="number" id="s21a" value="80" step="1"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>|S12|</label><input type="number" id="s12m" value="0.04" step="0.01"></div>
+        <div class="field"><label>∠S12 (°)</label><input type="number" id="s12a" value="30" step="1"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>|S22|</label><input type="number" id="s22m" value="0.6" step="0.01"></div>
+        <div class="field"><label>∠S22 (°)</label><input type="number" id="s22a" value="-40" step="1"></div>
+      </div>
+      <hr class="div" style="margin:14px 0;">
+    </div>
+
+    <!-- STABILITY -->
+    <div class="form-panel active" id="panel-stability">
+      <div class="radio-row">
+        <label><input type="radio" name="scPort" value="input" checked> Input (Γs plane)</label>
+        <label><input type="radio" name="scPort" value="output"> Output (Γl plane)</label>
+      </div>
+      <div class="swatches" id="swatches-stability"></div>
+      <button class="btn" id="btn-stability" onclick="addStability()">Add stability circle</button>
+      <div class="readout" id="stabilityReadout"></div>
+    </div>
+
+    <!-- GAIN -->
+    <div class="form-panel" id="panel-gain">
+      <div class="radio-row">
+        <label><input type="radio" name="gainKind" value="op" checked> Operating (Γl plane)</label>
+        <label><input type="radio" name="gainKind" value="avail" disabled title="Coming soon"> Available (Γs plane)</label>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Target gain (dB)</label><input type="number" id="gainDb" value="12" step="0.5"></div>
+        <div class="field"><label>Label</label><input type="text" id="gainLabel" placeholder="defaults to '12 dB'"></div>
+      </div>
+      <div class="swatches" id="swatches-gain"></div>
+      <button class="btn" id="btn-gain" onclick="addGainCircle()">Add gain circle</button>
+      <div class="readout" id="gainReadout"></div>
+      <hr class="div" style="margin:14px 0;">
+      <button class="btn secondary" onclick="addConjugateMatch()">Add match points (Γ<sub>ms</sub>, Γ<sub>ml</sub>)</button>
+    </div>
+
+    <!-- STUB MATCH -->
+    <div class="form-panel" id="panel-stub">
+      <div class="field-row">
+        <div class="field" style="flex:1 1 100%;">
+          <label>Γ_L source (pick a circle on the chart)</label>
+          <select id="stubCircleSelect"></select>
+        </div>
+      </div>
+      <div class="radio-row">
+        <label><input type="radio" name="stubMode" value="auto" checked> Closest point to origin</label>
+        <label><input type="radio" name="stubMode" value="manual"> Manual angle on circle</label>
+      </div>
+      <div id="stub-manual-fields" class="field-row" style="display:none;">
+        <div class="field"><label>Angle on circle (°)</label><input type="number" id="stubAngle" value="0" step="1"></div>
+      </div>
+      <p class="note" style="margin-top:0;">Γ_L is picked from the operating gain circle you choose; Γ_S is then computed analytically from the input match condition, Γ_S = (S<sub>11</sub> + S<sub>12</sub>S<sub>21</sub>Γ_L/(1&#8722;S<sub>22</sub>Γ_L))*.</p>
+
+      <details class="collapsible" open>
+        <summary>Physical lengths (mm)</summary>
+        <div class="collapsible-body">
+          <div class="field-row">
+            <div class="field"><label>Frequency (GHz)</label><input type="number" id="stubFreq" value="2.4" step="0.1"></div>
+            <div class="field"><label>Dielectric constant (ε<sub>r</sub>)</label><input type="number" id="stubEpsR" value="4.4" step="0.05"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Board thickness (mm)</label><input type="number" id="stubHeight" value="1.6" step="0.05"></div>
+          </div>
+          <p class="note" style="margin:0;">Synthesizes the microstrip trace width (Hammerstad's equations) from Z<sub>0</sub> (the reference field at the top of the sidebar), ε<sub>r</sub>, and thickness, then converts every electrical length below into physical mm alongside it.</p>
+        </div>
+      </details>
+
+      <button class="btn" onclick="computeStubMatch()">Compute Γ_L, Γ_S, and stub solutions</button>
+      <div class="readout" id="stubReadout"></div>
+    </div>
+
+    <!-- CIRCLE -->
+    <div class="form-panel" id="panel-circle">
+      <div class="radio-row">
+        <label><input type="radio" name="circMode" value="rect" checked> Center Re/Im</label>
+        <label><input type="radio" name="circMode" value="polar"> Center mag ∠ angle</label>
+      </div>
+      <div id="circ-rect-fields" class="field-row">
+        <div class="field"><label>Center Re(Γ)</label><input type="number" id="circRe" value="0.3" step="0.01"></div>
+        <div class="field"><label>Center Im(Γ)</label><input type="number" id="circIm" value="0.2" step="0.01"></div>
+      </div>
+      <div id="circ-polar-fields" class="field-row" style="display:none;">
+        <div class="field"><label>Center |Γ|</label><input type="number" id="circMag" value="0.36" step="0.01"></div>
+        <div class="field"><label>Center ∠ (°)</label><input type="number" id="circAng" value="34" step="1"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Radius</label><input type="number" id="circR" value="0.4" step="0.01"></div>
+        <div class="field"><label>Label</label><input type="text" id="circLabel" placeholder="e.g. G_a = 12 dB"></div>
+      </div>
+      <div class="swatches" id="swatches-circle"></div>
+      <button class="btn" id="btn-circle" onclick="addCircle()">Add circle</button>
+    </div>
+
+    <!-- VSWR -->
+    <div class="form-panel" id="panel-vswr">
+      <div class="field-row">
+        <div class="field"><label>VSWR</label><input type="number" id="vswrVal" value="2.0" step="0.1" min="1"></div>
+      </div>
+      <div class="swatches" id="swatches-vswr"></div>
+      <button class="btn" id="btn-vswr" onclick="addVSWR()">Add VSWR circle</button>
+    </div>
+
+    <!-- POINT -->
+    <div class="form-panel" id="panel-point">
+      <div class="radio-row">
+        <label><input type="radio" name="ptMode" value="gamma" checked> Γ (mag ∠ angle)</label>
+        <label><input type="radio" name="ptMode" value="z"> Z (R + jX)</label>
+      </div>
+      <div id="pt-gamma-fields" class="field-row">
+        <div class="field"><label>|Γ|</label><input type="number" id="ptMag" value="0.5" step="0.01"></div>
+        <div class="field"><label>∠Γ (°)</label><input type="number" id="ptAng" value="45" step="1"></div>
+      </div>
+      <div id="pt-z-fields" class="field-row" style="display:none;">
+        <div class="field"><label>R (Ω)</label><input type="number" id="ptR" value="25" step="1"></div>
+        <div class="field"><label>X (Ω)</label><input type="number" id="ptX" value="30" step="1"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Label</label><input type="text" id="ptLabel" placeholder="e.g. Z_{in}"></div>
+      </div>
+      <div class="swatches" id="swatches-point"></div>
+      <button class="btn" id="btn-point" onclick="addPoint()">Add point</button>
+    </div>
+
+    <!-- LINE -->
+    <div class="form-panel" id="panel-line">
+      <div class="field-row">
+        <div class="field"><label>Start Re(Γ)</label><input type="number" id="lnRe1" value="0" step="0.01"></div>
+        <div class="field"><label>Start Im(Γ)</label><input type="number" id="lnIm1" value="0" step="0.01"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>End Re(Γ)</label><input type="number" id="lnRe2" value="0.6" step="0.01"></div>
+        <div class="field"><label>End Im(Γ)</label><input type="number" id="lnIm2" value="0.3" step="0.01"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Label</label><input type="text" id="lnLabel" placeholder="optional"></div>
+      </div>
+      <div class="swatches" id="swatches-line"></div>
+      <button class="btn" id="btn-line" onclick="addLine()">Add line</button>
+    </div>
+
+    <p class="note">Circles are drawn at true size, including any portion outside the unit circle — that matters for reading unconditional stability.</p>
+    <p class="note">Labels support a small LaTeX-style syntax: Greek letters (<code>\Gamma</code>, <code>\theta</code>, <code>\Omega</code>...), symbols (<code>\pm</code>, <code>\times</code>, <code>\infty</code>...), and <code>^{2}</code> / <code>_{s}</code> for super/subscripts — e.g. <code>\Gamma_s</code> or <code>S_{21}</code>.</p>
+
+    <hr class="div">
+    <p class="section-title">Elements on chart</p>
+    <div class="item-list" id="itemList"></div>
+    <button class="btn secondary" style="margin-top:10px;" onclick="clearAll()">Clear all</button>
+  </aside>
+
+  <div class="resize-handle" id="resizeHandle" title="Drag to resize"></div>
+
+  <main class="canvas-wrap">
+    <div class="toolbar">
+      <input type="text" id="chartTitle" value="Smith Chart">
+      <div class="spacer"></div>
+      <div class="toolbar-group">
+        <div class="paper-toggle">
+          <button class="paper-btn active" id="paperCream" onclick="setPaperColor('#F5F0E3')">Cream</button>
+          <button class="paper-btn" id="paperWhite" onclick="setPaperColor('#FFFFFF')">White</button>
+        </div>
+      </div>
+      <div class="toolbar-group">
+        <label class="shade-toggle"><input type="checkbox" id="shadeToggle" checked onchange="renderAll()"> Shade unstable</label>
+        <label class="shade-toggle"><input type="checkbox" id="arcLabelToggle" checked onchange="renderAll()"> Arc labels</label>
+        <label class="shade-toggle"><input type="checkbox" id="admittanceToggle" onchange="onAdmittanceToggle()"> Admittance grid</label>
+      </div>
+    </div>
+    <div class="toolbar" style="margin-bottom:14px;">
+      <div class="toolbar-group">
+        <input type="file" id="sessionFile" accept=".json" style="display:none;">
+        <button class="toolbar-btn" onclick="document.getElementById('sessionFile').click()">Load session</button>
+        <button class="toolbar-btn" onclick="exportSession()">Save session</button>
+      </div>
+      <div class="toolbar-group">
+        <button class="toolbar-btn" onclick="exportSVG()">Save SVG</button>
+        <button class="toolbar-btn" onclick="exportPNG()">Save PNG</button>
+      </div>
+      <div class="spacer"></div>
+      <div class="toolbar-group">
+        <button class="toolbar-btn" onclick="resetLabelPositions()" title="Undo manual label drags">Reset labels</button>
+      </div>
+      <div class="toolbar-group">
+        <div class="paper-toggle">
+          <button class="paper-btn" onclick="zoomStep(1/1.4)" title="Zoom in">+</button>
+          <button class="paper-btn" onclick="zoomStep(1.4)" title="Zoom out">−</button>
+          <button class="paper-btn" onclick="resetZoom()" title="Reset zoom">Reset</button>
+        </div>
+      </div>
+    </div>
+    <div class="readout-row">
+      <div class="cursor-readout" id="cursorReadout">Γ: <b>—</b> &nbsp;&nbsp; Z: <b>—</b> &nbsp;&nbsp; VSWR: <b>—</b> &nbsp;&nbsp; RL: <b>—</b></div>
+      <span class="zoom-hint">scroll to zoom &middot; drag to pan &middot; exports match the current view</span>
+    </div>
+    <svg id="chart" viewBox="0 0 640 640" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <clipPath id="unitClip"><circle cx="320" cy="320" r="250"/></clipPath>
+        <pattern id="hatchPattern" width="8" height="8" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+          <rect width="8" height="8" fill="#B23A2E" opacity="0.08"/>
+          <line x1="0" y1="0" x2="0" y2="8" stroke="#B23A2E" stroke-width="1.6" opacity="0.45"/>
+        </pattern>
+        <marker id="arrow0" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#C4562D"/></marker>
+        <marker id="arrow1" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#2A7F74"/></marker>
+        <marker id="arrow2" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#4A5FA5"/></marker>
+        <marker id="arrow3" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#B98A2E"/></marker>
+        <marker id="arrow4" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#7A4B6E"/></marker>
+        <marker id="arrow5" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#3C6B35"/></marker>
+      </defs>
+      <rect x="0" y="0" width="640" height="640" fill="var(--paper)" id="bgRect"/>
+      <g id="shadeLayer"></g>
+      <text id="svgTitle" x="26" y="34" font-family="Inter, sans-serif" font-size="15" font-weight="600" fill="#1C2A3A">Smith Chart</text>
+      <g id="gridLayer"></g>
+      <g id="userLayer"></g>
+      <g id="labelLayer">
+        <g id="gridLabels"></g>
+        <g id="userLabels"></g>
+      </g>
+    </svg>
+  </main>
+
+</div>
+
+<script>
+const NS = "http://www.w3.org/2000/svg";
+const CX = 320, CY = 320, R = 250;
+const PALETTE = ['#C4562D','#2A7F74','#4A5FA5','#B98A2E','#7A4B6E','#3C6B35'];
+let colorIdx = 0;
+let currentPaper = '#F5F0E3';
+let viewBox = {x:0, y:0, w:640, h:640};
+let labelOffsets = {}; // itemId -> {dx,dy}, manual nudges applied on top of auto-placement
+
+function svgPointFromEvent(svg, evt){
+  const pt = svg.createSVGPoint();
+  pt.x = evt.clientX; pt.y = evt.clientY;
+  const ctm = svg.getScreenCTM();
+  if (!ctm) return {x:0, y:0};
+  return pt.matrixTransform(ctm.inverse());
+}
+
+// makes a label's wrapper group draggable; stopPropagation keeps this from also triggering
+// the chart's own pan-on-drag handler
+function wireLabelDrag(wrapper, id){
+  wrapper.style.cursor = 'grab';
+  wrapper.addEventListener('mousedown', function(evt){
+    evt.stopPropagation();
+    evt.preventDefault();
+    const svg = document.getElementById('chart');
+    const startOffset = Object.assign({dx:0, dy:0}, labelOffsets[id]);
+    const startPt = svgPointFromEvent(svg, evt);
+    wrapper.style.cursor = 'grabbing';
+    function onMove(e){
+      const curPt = svgPointFromEvent(svg, e);
+      const dx = startOffset.dx + (curPt.x - startPt.x);
+      const dy = startOffset.dy + (curPt.y - startPt.y);
+      wrapper.setAttribute('transform', `translate(${dx},${dy})`);
+      labelOffsets[id] = {dx, dy};
+    }
+    function onUp(){
+      wrapper.style.cursor = 'grab';
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    }
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  });
+}
+
+function setPaperColor(color){
+  currentPaper = color;
+  document.documentElement.style.setProperty('--paper', color);
+  document.getElementById('bgRect').setAttribute('fill', color);
+  document.getElementById('paperCream').classList.toggle('active', color === '#F5F0E3');
+  document.getElementById('paperWhite').classList.toggle('active', color === '#FFFFFF');
+  renderAll(); // label backings and point rings need to be redrawn in the new color
+}
+let items = [];
+let itemSeq = 0;
+let editingId = null;
+let editingSourceType = null;
+
+// ---------- complex math ----------
+const cAdd = (a,b)=>({re:a.re+b.re, im:a.im+b.im});
+const cSub = (a,b)=>({re:a.re-b.re, im:a.im-b.im});
+const cMul = (a,b)=>({re:a.re*b.re - a.im*b.im, im:a.re*b.im + a.im*b.re});
+const cDiv = (a,b)=>{ const d = b.re*b.re + b.im*b.im; return {re:(a.re*b.re + a.im*b.im)/d, im:(a.im*b.re - a.re*b.im)/d}; };
+const cConj = (a)=>({re:a.re, im:-a.im});
+const cAbs = (a)=>Math.sqrt(a.re*a.re + a.im*a.im);
+const polar = (mag, angDeg)=>{ const r = angDeg*Math.PI/180; return {re: mag*Math.cos(r), im: mag*Math.sin(r)}; };
+
+function zToGamma(re, im){
+  const z = {re, im};
+  return cDiv(cSub(z,{re:1,im:0}), cAdd(z,{re:1,im:0}));
+}
+
+function gammaToZ(g){
+  return cDiv(cAdd({re:1,im:0}, g), cSub({re:1,im:0}, g));
+}
+
+// ---------- coordinate mapping ----------
+function toSvg(re, im){ return {x: CX + re*R, y: CY - im*R}; }
+
+// builds the SVG path for the constant-|\u0393| rotation arc a single-stub design sweeps
+// through: starting at gammaTarget and rotating "toward the generator" (clockwise, since
+// \u0393(d) = \u0393_target\u00b7e^(-j4\u03c0d)) by d wavelengths. Returns the path's d-string plus the
+// endpoint (so a marker/label can be placed there).
+function arcPathD(gammaTarget, d){
+  const radius = cAbs(gammaTarget);
+  const startAngle = Math.atan2(gammaTarget.im, gammaTarget.re);
+  const sweep = 4*Math.PI*d; // radians, always in [0, 2\u03c0) since d in [0, 0.5)
+  const endAngle = startAngle - sweep;
+  const startPt = toSvg(radius*Math.cos(startAngle), radius*Math.sin(startAngle));
+  const endPt = toSvg(radius*Math.cos(endAngle), radius*Math.sin(endAngle));
+  const rSvg = radius*R;
+  const largeArc = sweep > Math.PI ? 1 : 0;
+  const d_str = `M ${startPt.x} ${startPt.y} A ${rSvg} ${rSvg} 0 ${largeArc} 1 ${endPt.x} ${endPt.y}`;
+  const midAngle = startAngle - sweep/2;
+  const midPt = toSvg(radius*Math.cos(midAngle), radius*Math.sin(midAngle));
+  return {d: d_str, startPt, endPt, midPt, endGamma: {re: radius*Math.cos(endAngle), im: radius*Math.sin(endAngle)}};
+}
+
+// generic helper: given a circle's SVG center and three SVG points known to lie on it
+// (start, a sample point known to be ON the desired arc, and end), determines the correct
+// SVG arc sweep-flag/large-arc-flag so the drawn arc actually passes through the sample
+// point rather than going the "wrong way" around the circle
+function threePointArcFlags(svgCenter, svgP1, svgPmid, svgP2){
+  const norm = a => ((a % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
+  const angle = p => Math.atan2(p.y - svgCenter.y, p.x - svgCenter.x);
+  const A1 = norm(angle(svgP1)), AM = norm(angle(svgPmid)), A2 = norm(angle(svgP2));
+  let sweepFwd = A2 - A1; if (sweepFwd < 0) sweepFwd += 2*Math.PI;
+  let deltaMid = AM - A1; if (deltaMid < 0) deltaMid += 2*Math.PI;
+  if (deltaMid <= sweepFwd + 1e-9){
+    return {sweepFlag: 1, largeArc: sweepFwd > Math.PI ? 1 : 0};
+  }
+  const sweepBack = 2*Math.PI - sweepFwd;
+  return {sweepFlag: 0, largeArc: sweepBack > Math.PI ? 1 : 0};
+}
+
+// a point on the r=1 constant-resistance circle, parametrized by reactance x (z=1+jx).
+// This circle passes through the origin (x=0) and through \u0393=+1 (x=\u00b1\u221e).
+function r1CirclePoint(x){
+  return cDiv({re:0, im:x}, {re:2, im:x});
+}
+
+// the susceptance-cancelling move: adding a shunt stub's susceptance moves the point along
+// a constant-conductance circle. In the mirrored/admittance-point convention (plotting -\u0393
+// so the impedance grid can be read directly as g,b), that circle IS the r=1 circle we
+// already draw \u2014 so this just walks it from x=B (the leftover susceptance) to x=0 (matched).
+function r1ArcPathD(x){
+  if (Math.abs(x) < 1e-9) return null; // already matched, nothing to draw
+  const center = {re:0.5, im:0};
+  const svgCenter = toSvg(center.re, center.im);
+  const P1 = r1CirclePoint(x), P2 = {re:0, im:0}, Pmid = r1CirclePoint(x/2);
+  const svgP1 = toSvg(P1.re, P1.im), svgP2 = toSvg(P2.re, P2.im), svgPmid = toSvg(Pmid.re, Pmid.im);
+  const flags = threePointArcFlags(svgCenter, svgP1, svgPmid, svgP2);
+  const rSvg = 0.5*R;
+  const d_str = `M ${svgP1.x} ${svgP1.y} A ${rSvg} ${rSvg} 0 ${flags.largeArc} ${flags.sweepFlag} ${svgP2.x} ${svgP2.y}`;
+  return {d: d_str, startPt: svgP1, endPt: svgP2, midPt: svgPmid};
+}
+
+// ---------- unstable-region shading ----------
+// A stability circle's boundary is where |\u0393in|=1 (output circle, \u0393L-plane) or |\u0393out|=1
+// (input circle, \u0393S-plane). Testing the origin tells us which side of the circle is stable:
+// at \u0393L=0, \u0393in=S11, so the origin is stable iff |S11|<1; at \u0393S=0, \u0393out=S22, so the
+// origin is stable iff |S22|<1. Comparing that to whether the origin is geometrically inside
+// or outside the drawn circle tells us which region (inside/outside) to shade as unstable.
+function circlePathD(cx, cy, r){
+  return `M ${cx-r} ${cy} A ${r} ${r} 0 1 0 ${cx+r} ${cy} A ${r} ${r} 0 1 0 ${cx-r} ${cy} Z`;
+}
+
+function renderStabilityShading(){
+  const layer = document.getElementById('shadeLayer');
+  layer.innerHTML = '';
+  const toggle = document.getElementById('shadeToggle');
+  if (!toggle || !toggle.checked) return;
+
+  items.forEach(it=>{
+    if (it.sourceType !== 'stability' || !it.params) return;
+    const p = it.params;
+    const isOriginStable = (p.port === 'input') ? (p.s22m < 1) : (p.s11m < 1);
+
+    const c = toSvg(it.center.re, it.center.im);
+    const rad = it.radius * R;
+    const distFromOrigin = Math.hypot(c.x - CX, c.y - CY);
+    const isOriginInsideCircle = distFromOrigin < rad;
+    const unstableIsInside = isOriginInsideCircle ? !isOriginStable : isOriginStable;
+
+    if (unstableIsInside){
+      // unstable region = inside the stability circle, clipped to the chart
+      const el = document.createElementNS(NS,'circle');
+      el.setAttribute('cx', c.x); el.setAttribute('cy', c.y); el.setAttribute('r', rad);
+      el.setAttribute('fill', 'url(#hatchPattern)');
+      el.setAttribute('clip-path', 'url(#unitClip)');
+      layer.appendChild(el);
+    } else {
+      // unstable region = chart area minus the stability circle. The evenodd path alone
+      // computes the symmetric difference of the two disks, not a true subtraction \u2014 when
+      // the stability circle is much larger than the chart, that symmetric difference leaks
+      // out to cover almost the whole canvas. The clip-path is what actually bounds it to
+      // the chart, restoring the correct "chart area minus circle" result.
+      const el = document.createElementNS(NS,'path');
+      el.setAttribute('d', circlePathD(CX, CY, R) + ' ' + circlePathD(c.x, c.y, rad));
+      el.setAttribute('fill-rule', 'evenodd');
+      el.setAttribute('fill', 'url(#hatchPattern)');
+      el.setAttribute('clip-path', 'url(#unitClip)');
+      layer.appendChild(el);
+    }
+  });
+}
+
+// ---------- grid ----------
+// grid density gets finer as you zoom in, so zooming reveals more resolution instead of
+// just magnifying the same handful of circles. Tier is chosen from the current viewBox size.
+const GRID_TIERS = [
+  { // 0: full view
+    r: [0, 0.2, 0.5, 1, 2, 3, 5, 10],
+    x: [0.2, 0.5, 1, 2, 3, 5, 10],
+    rLabels: [0.2, 0.5, 1, 2, 5],
+    xLabels: [0.2, 0.5, 1, 2, 5]
+  },
+  { // 1: moderate zoom
+    r: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.7, 1, 1.5, 2, 3, 4, 5, 7, 10],
+    x: [0.1, 0.2, 0.3, 0.4, 0.5, 0.7, 1, 1.5, 2, 3, 4, 5, 7, 10],
+    rLabels: [0.1, 0.2, 0.5, 1, 2, 5, 10],
+    xLabels: [0.1, 0.2, 0.5, 1, 2, 5, 10]
+  },
+  { // 2: fine zoom
+    r: [0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.2, 1.5, 1.8, 2, 2.5, 3, 4, 5, 7, 10, 15, 20],
+    x: [0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.2, 1.5, 1.8, 2, 2.5, 3, 4, 5, 7, 10, 15, 20],
+    rLabels: [0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20],
+    xLabels: [0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20]
+  },
+  { // 3: very fine zoom (near a specific point)
+    r: [0, 0.02, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.7, 2, 2.5, 3, 4, 5, 7, 10, 15, 20, 30],
+    x: [0.02, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.7, 2, 2.5, 3, 4, 5, 7, 10, 15, 20, 30],
+    rLabels: [0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20],
+    xLabels: [0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20]
+  }
+];
+
+function gridTierForZoom(){
+  if (viewBox.w > 400) return 0;
+  if (viewBox.w > 180) return 1;
+  if (viewBox.w > 70) return 2;
+  return 3;
+}
+
+let builtGridTier = -1;
+
+function buildGrid(tier){
+  if (tier === undefined) tier = 0;
+  builtGridTier = tier;
+  const cfg = GRID_TIERS[tier];
+  const g = document.getElementById('gridLayer');
+  g.innerHTML = '';
+
+  const rVals = cfg.r;
+  const xVals = cfg.x;
+  const showAdmittance = document.getElementById('admittanceToggle') && document.getElementById('admittanceToggle').checked;
+  const admColor = '#4E7A8C';
+
+  rVals.forEach(rv=>{
+    const centerRe = rv/(rv+1);
+    const rad = 1/(rv+1);
+    const c = document.createElementNS(NS,'circle');
+    c.setAttribute('cx', CX + centerRe*R);
+    c.setAttribute('cy', CY);
+    c.setAttribute('r', rad*R);
+    c.setAttribute('fill','none');
+    c.setAttribute('stroke', rv===1 ? '#16222E' : '#3A4C5E');
+    c.setAttribute('stroke-width', rv===1 ? 1.1 : 0.6);
+    c.setAttribute('clip-path','url(#unitClip)');
+    g.appendChild(c);
+
+    if (showAdmittance){
+      // constant-conductance (g) circle: the constant-r circle mirrored through the origin
+      // (z and y=1/z sit at diametrically opposite \u0393, same radius)
+      const gc = document.createElementNS(NS,'circle');
+      gc.setAttribute('cx', CX - centerRe*R);
+      gc.setAttribute('cy', CY);
+      gc.setAttribute('r', rad*R);
+      gc.setAttribute('fill','none');
+      gc.setAttribute('stroke', admColor);
+      gc.setAttribute('stroke-width', rv===1 ? 1.0 : 0.55);
+      gc.setAttribute('stroke-dasharray', rv===1 ? '4,3' : '3,3');
+      gc.setAttribute('opacity', 0.75);
+      gc.setAttribute('clip-path','url(#unitClip)');
+      g.appendChild(gc);
+    }
+  });
+
+  xVals.forEach(xv=>{
+    [1,-1].forEach(sign=>{
+      const xs = sign*xv;
+      const centerIm = 1/xs;
+      const rad = 1/Math.abs(xs);
+      const c = document.createElementNS(NS,'circle');
+      c.setAttribute('cx', CX + R);
+      c.setAttribute('cy', CY - centerIm*R);
+      c.setAttribute('r', rad*R);
+      c.setAttribute('fill','none');
+      c.setAttribute('stroke', xv===1 ? '#16222E' : '#3A4C5E');
+      c.setAttribute('stroke-width', xv===1 ? 1.1 : 0.6);
+      c.setAttribute('clip-path','url(#unitClip)');
+      g.appendChild(c);
+
+      if (showAdmittance){
+        // constant-susceptance (b) circle: the constant-x circle mirrored through the origin
+        const bc = document.createElementNS(NS,'circle');
+        bc.setAttribute('cx', CX - R);
+        bc.setAttribute('cy', CY + centerIm*R);
+        bc.setAttribute('r', rad*R);
+        bc.setAttribute('fill','none');
+        bc.setAttribute('stroke', admColor);
+        bc.setAttribute('stroke-width', xv===1 ? 1.0 : 0.55);
+        bc.setAttribute('stroke-dasharray', xv===1 ? '4,3' : '3,3');
+        bc.setAttribute('opacity', 0.75);
+        bc.setAttribute('clip-path','url(#unitClip)');
+        g.appendChild(bc);
+      }
+    });
+  });
+
+  // outer rim
+  const rim = document.createElementNS(NS,'circle');
+  rim.setAttribute('cx',CX); rim.setAttribute('cy',CY); rim.setAttribute('r',R);
+  rim.setAttribute('fill','none'); rim.setAttribute('stroke','#101820'); rim.setAttribute('stroke-width',1.6);
+  g.appendChild(rim);
+
+  // spine (x=0 axis)
+  const spine = document.createElementNS(NS,'line');
+  spine.setAttribute('x1', CX-R); spine.setAttribute('y1', CY);
+  spine.setAttribute('x2', CX+R); spine.setAttribute('y2', CY);
+  spine.setAttribute('stroke','#101820'); spine.setAttribute('stroke-width',1.1);
+  g.appendChild(spine);
+
+  buildGridLabels(tier);
+}
+
+// tick label size and position depend on the CURRENT zoom (font-size scales with it, and
+// placement clamps against the current viewBox), so unlike the grid circles above \u2014 which
+// only need rebuilding when the tier's value-set actually changes \u2014 labels need refreshing
+// on every zoom/pan tick to stay correctly sized and positioned, including returning cleanly
+// to their original look when zooming back out.
+function buildGridLabels(tier){
+  if (tier === undefined) tier = builtGridTier >= 0 ? builtGridTier : 0;
+  const cfg = GRID_TIERS[tier];
+  const gridLabels = document.getElementById('gridLabels');
+  gridLabels.innerHTML = '';
+
+  // r-axis labels
+  cfg.rLabels.forEach(rv=>{
+    const p = toSvg(zToGamma(rv,0).re, 0);
+    addLabel(gridLabels, p.x, CY+15, String(rv), '#5B6B7A', {fontSize:9, mono:true, weight:400});
+  });
+
+  // rim x-labels
+  cfg.xLabels.forEach(xv=>{
+    [1,-1].forEach(sign=>{
+      const gm = zToGamma(0, sign*xv);
+      const p = toSvg(gm.re*1.065, gm.im*1.065);
+      addLabel(gridLabels, p.x, p.y, (sign<0 ? '\u2212j' : 'j') + xv, '#5B6B7A', {fontSize:8, mono:true, weight:400});
+    });
+  });
+}
+
+// ---------- swatches ----------
+function buildSwatches(){
+  document.querySelectorAll('[id^="swatches-"]').forEach(row=>{
+    row.innerHTML = '';
+    PALETTE.forEach((col, i)=>{
+      const s = document.createElement('div');
+      s.className = 'swatch' + (i===colorIdx ? ' selected' : '');
+      s.style.background = col;
+      s.dataset.index = i;
+      s.onclick = ()=>{
+        colorIdx = i;
+        document.querySelectorAll('.swatch').forEach(sw=>sw.classList.remove('selected'));
+        document.querySelectorAll(`[id^="swatches-"] .swatch[data-index="${i}"]`).forEach(sw=>sw.classList.add('selected'));
+      };
+      row.appendChild(s);
+    });
+  });
+}
+
+// ---------- touchstone (.s2p) import ----------
+let s2pPoints = [];
+
+function parseS2P(text){
+  const lines = text.split(/\r?\n/);
+  let freqUnit = 'GHz', format = 'MA', z0 = 50;
+  const dataLines = [];
+
+  lines.forEach(raw=>{
+    const line = raw.trim();
+    if (!line || line.startsWith('!')) return;
+    if (line.startsWith('#')){
+      const toks = line.slice(1).trim().split(/\s+/).map(t=>t.toUpperCase());
+      toks.forEach((tok,i)=>{
+        if (['HZ','KHZ','MHZ','GHZ'].includes(tok)) freqUnit = tok;
+        if (['MA','DB','RI'].includes(tok)) format = tok;
+        if (tok === 'R' && toks[i+1]) z0 = parseFloat(toks[i+1]);
+      });
+      return;
+    }
+    dataLines.push(line);
+  });
+
+  const tokens = dataLines.join(' ').trim().split(/\s+/).filter(t=>t.length).map(parseFloat);
+  const unitMult = {HZ:1, KHZ:1e3, MHZ:1e6, GHZ:1e9}[freqUnit] || 1e9;
+
+  const points = [];
+  for (let i=0; i+9 <= tokens.length; i+=9){
+    const freqHz = tokens[i]*unitMult;
+    const pairs = [];
+    for (let k=0;k<4;k++){
+      const a = tokens[i+1+k*2], b = tokens[i+2+k*2];
+      let mag, ang;
+      if (format === 'RI'){
+        mag = Math.sqrt(a*a+b*b); ang = Math.atan2(b,a)*180/Math.PI;
+      } else if (format === 'DB'){
+        mag = Math.pow(10, a/20); ang = b;
+      } else {
+        mag = a; ang = b;
+      }
+      pairs.push({mag, ang});
+    }
+    // Touchstone 2-port order is S11, S21, S12, S22
+    points.push({freqHz, S11:pairs[0], S21:pairs[1], S12:pairs[2], S22:pairs[3]});
+  }
+  return {z0, points};
+}
+
+function formatFreq(hz){
+  if (hz >= 1e9) return (hz/1e9).toFixed(4).replace(/0+$/,'').replace(/\.$/,'') + ' GHz';
+  if (hz >= 1e6) return (hz/1e6).toFixed(4).replace(/0+$/,'').replace(/\.$/,'') + ' MHz';
+  if (hz >= 1e3) return (hz/1e3).toFixed(4).replace(/0+$/,'').replace(/\.$/,'') + ' kHz';
+  return hz.toFixed(1) + ' Hz';
+}
+
+document.getElementById('s2pFile').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if (!file) return;
+  const status = document.getElementById('s2pStatus');
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    try{
+      const parsed = parseS2P(ev.target.result);
+      if (!parsed.points.length) throw new Error('No data points found');
+      s2pPoints = parsed.points;
+      const sel = document.getElementById('s2pFreqSelect');
+      sel.innerHTML = '';
+      s2pPoints.forEach((p,i)=>{
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = formatFreq(p.freqHz);
+        sel.appendChild(opt);
+      });
+      document.getElementById('s2pFreqRow').style.display = 'flex';
+      document.getElementById('s2pLoadBtn').style.display = 'block';
+      document.getElementById('z0').value = parsed.z0;
+      status.style.display = 'block';
+      status.textContent = `Loaded ${s2pPoints.length} frequency point(s) from ${file.name}. Z\u2080 = ${parsed.z0} \u03a9.`;
+    }catch(err){
+      status.style.display = 'block';
+      status.textContent = 'Could not parse this file as a 2-port Touchstone (.s2p) file.';
+      s2pPoints = [];
+      document.getElementById('s2pFreqRow').style.display = 'none';
+      document.getElementById('s2pLoadBtn').style.display = 'none';
+    }
+  };
+  reader.readAsText(file);
+});
+
+function loadS2pPoint(){
+  const idx = parseInt(document.getElementById('s2pFreqSelect').value, 10);
+  const p = s2pPoints[idx];
+  if (!p) return;
+  document.getElementById('s11m').value = p.S11.mag.toFixed(4);
+  document.getElementById('s11a').value = p.S11.ang.toFixed(2);
+  document.getElementById('s21m').value = p.S21.mag.toFixed(4);
+  document.getElementById('s21a').value = p.S21.ang.toFixed(2);
+  document.getElementById('s12m').value = p.S12.mag.toFixed(4);
+  document.getElementById('s12a').value = p.S12.ang.toFixed(2);
+  document.getElementById('s22m').value = p.S22.mag.toFixed(4);
+  document.getElementById('s22a').value = p.S22.ang.toFixed(2);
+}
+
+// ---------- tabs ----------
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.onclick = ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.form-panel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.mode).classList.add('active');
+    const needsSparams = (tab.dataset.mode === 'stability' || tab.dataset.mode === 'gain' || tab.dataset.mode === 'stub');
+    document.getElementById('sparamBlock').style.display = needsSparams ? 'block' : 'none';
+  };
+});
+
+document.querySelectorAll('input[name="ptMode"]').forEach(r=>{
+  r.onchange = ()=>{
+    const isZ = document.querySelector('input[name="ptMode"]:checked').value === 'z';
+    document.getElementById('pt-gamma-fields').style.display = isZ ? 'none' : 'flex';
+    document.getElementById('pt-z-fields').style.display = isZ ? 'flex' : 'none';
+  };
+});
+
+document.querySelectorAll('input[name="circMode"]').forEach(r=>{
+  r.onchange = ()=>{
+    const isPolar = document.querySelector('input[name="circMode"]:checked').value === 'polar';
+    document.getElementById('circ-rect-fields').style.display = isPolar ? 'none' : 'flex';
+    document.getElementById('circ-polar-fields').style.display = isPolar ? 'flex' : 'none';
+  };
+});
+
+document.querySelectorAll('input[name="stubMode"]').forEach(r=>{
+  r.onchange = ()=>{
+    const isManual = document.querySelector('input[name="stubMode"]:checked').value === 'manual';
+    document.getElementById('stub-manual-fields').style.display = isManual ? 'flex' : 'none';
+  };
+});
+
+// ---------- add functions ----------
+function nextColor(){
+  const c = PALETTE[colorIdx % PALETTE.length];
+  colorIdx = (colorIdx + 1) % PALETTE.length;
+  buildSwatches();
+  return c;
+}
+
+// while editing an item of the SAME type currently being submitted, reuse whatever swatch
+// is selected instead of auto-advancing the palette; otherwise behaves like nextColor()
+function colorForCommit(sourceType){
+  if (editingId !== null && editingSourceType === sourceType){
+    return PALETTE[colorIdx % PALETTE.length];
+  }
+  return nextColor();
+}
+
+// pushes a new item, or — if currently editing an item of this same sourceType —
+// overwrites that item in place (keeping its id and position in the list)
+function commitItem(sourceType, partial){
+  if (editingId !== null && editingSourceType === sourceType){
+    const idx = items.findIndex(it=>it.id === editingId);
+    if (idx !== -1) items[idx] = Object.assign({id: editingId, sourceType}, partial);
+    endEdit();
+  } else {
+    if (editingId !== null) endEdit(); // switching item type mid-edit cancels the stale edit
+    items.push(Object.assign({id: itemSeq++, sourceType}, partial));
+  }
+  renderAll();
+}
+
+function readSparams(){
+  return {
+    S11: polar(parseFloat(document.getElementById('s11m').value), parseFloat(document.getElementById('s11a').value)),
+    S12: polar(parseFloat(document.getElementById('s12m').value), parseFloat(document.getElementById('s12a').value)),
+    S21: polar(parseFloat(document.getElementById('s21m').value), parseFloat(document.getElementById('s21a').value)),
+    S22: polar(parseFloat(document.getElementById('s22m').value), parseFloat(document.getElementById('s22a').value))
+  };
+}
+
+// raw field values (not complex objects) — used to persist/restore the S-parameter form for editing
+function sparamValues(){
+  const v = id => parseFloat(document.getElementById(id).value);
+  return {
+    s11m: v('s11m'), s11a: v('s11a'), s21m: v('s21m'), s21a: v('s21a'),
+    s12m: v('s12m'), s12a: v('s12a'), s22m: v('s22m'), s22a: v('s22a')
+  };
+}
+
+function addStability(){
+  const port = document.querySelector('input[name="scPort"]:checked').value;
+  const {S11, S12, S21, S22} = readSparams();
+  const sp = sparamValues();
+
+  const delta = cSub(cMul(S11,S22), cMul(S12,S21));
+  const deltaMag = cAbs(delta);
+  const s11m2 = cAbs(S11)**2, s22m2 = cAbs(S22)**2;
+  const K = (1 - s11m2 - s22m2 + deltaMag*deltaMag) / (2*cAbs(S12)*cAbs(S21));
+
+  let center, radius, label;
+  if (port === 'input'){
+    const denom = s11m2 - deltaMag*deltaMag;
+    const num = cConj(cSub(S11, cMul(delta, cConj(S22))));
+    center = {re: num.re/denom, im: num.im/denom};
+    radius = Math.abs(cAbs(cMul(S12,S21)) / denom);
+    label = 'Input stability (\\Gamma_s)';
+  } else {
+    const denom = s22m2 - deltaMag*deltaMag;
+    const num = cConj(cSub(S22, cMul(delta, cConj(S11))));
+    center = {re: num.re/denom, im: num.im/denom};
+    radius = Math.abs(cAbs(cMul(S12,S21)) / denom);
+    label = 'Output stability (\\Gamma_l)';
+  }
+
+  const color = colorForCommit('stability');
+  commitItem('stability', {type:'circle', center, radius, label, color, params: Object.assign({port}, sp)});
+
+  const ro = document.getElementById('stabilityReadout');
+  ro.classList.add('show');
+  ro.innerHTML = `K = ${K.toFixed(3)} &nbsp;&nbsp; |&Delta;| = ${deltaMag.toFixed(3)}<br>${K>1 && deltaMag<1 ? 'Unconditionally stable (K&gt;1, |&Delta;|&lt;1)' : 'Potentially unstable \u2014 check the circle against |\u0393|&lt;1'}`;
+}
+
+// operating power gain circles (constant G_P in the \u0393_L plane), Gonzalez/Pozar eq. form:
+//   g = G_P / |S21|\u00b2,  C2 = S22 - \u0394 S11*
+//   C_p = g C2* / (1 + g(|S22|\u00b2-|\u0394|\u00b2)),  r_p = sqrt(1-2Kg|S12S21|+g\u00b2|S12S21|\u00b2) / |1+g(|S22|\u00b2-|\u0394|\u00b2)|
+function addGainCircle(){
+  const {S11, S12, S21, S22} = readSparams();
+  const sp = sparamValues();
+
+  const delta = cSub(cMul(S11,S22), cMul(S12,S21));
+  const deltaMag = cAbs(delta);
+  const s11m2 = cAbs(S11)**2, s22m2 = cAbs(S22)**2;
+  const s12s21mag = cAbs(cMul(S12,S21));
+  const s21mag2 = cAbs(S21)**2;
+  const K = (1 - s11m2 - s22m2 + deltaMag*deltaMag) / (2*s12s21mag);
+
+  const gainDb = parseFloat(document.getElementById('gainDb').value);
+  const Gp = Math.pow(10, gainDb/10);
+  const g = Gp / s21mag2;
+
+  const C2 = cSub(S22, cMul(delta, cConj(S11)));
+  const denom = 1 + g*(s22m2 - deltaMag*deltaMag);
+  const centerNum = cMul({re:g, im:0}, cConj(C2));
+  const center = {re: centerNum.re/denom, im: centerNum.im/denom};
+
+  const radicand = 1 - 2*K*g*s12s21mag + (g*g)*(s12s21mag*s12s21mag);
+  const radius = Math.sqrt(Math.max(0, radicand)) / Math.abs(denom);
+
+  const color = colorForCommit('gain');
+  const rawLabel = document.getElementById('gainLabel').value;
+  const label = rawLabel || `${gainDb} dB`;
+  commitItem('gain', {type:'circle', center, radius, label, color, params: Object.assign({gainDb, label:rawLabel}, sp)});
+
+  const ro = document.getElementById('gainReadout');
+  ro.classList.add('show');
+  let note = '';
+  let unreachable = false;
+  const s21s12ratio = Math.sqrt(s21mag2) / cAbs(S12);
+  if (K > 1){
+    const Gmax = s21s12ratio * (K - Math.sqrt(K*K - 1));
+    const GmaxDb = 10*Math.log10(Gmax);
+    if (Gp > Gmax){
+      unreachable = true;
+      note = `\u26A0 Requested gain exceeds G<sub>max</sub> = ${GmaxDb.toFixed(2)} dB \u2014 not physically reachable; circle will not be drawn correctly.`;
+    } else {
+      note = `G<sub>max</sub> = ${GmaxDb.toFixed(2)} dB (K &gt; 1, unconditionally stable)`;
+    }
+  } else {
+    const GmsgDb = 10*Math.log10(s21s12ratio);
+    note = `MSG = ${GmsgDb.toFixed(2)} dB \u2014 device is potentially unstable (K &lt; 1); pair this with a stability circle.`;
+  }
+  ro.classList.toggle('warn', unreachable);
+  ro.innerHTML = `g = ${g.toFixed(3)} &nbsp;&nbsp; K = ${K.toFixed(3)}<br>${note}`;
+}
+
+// simultaneous conjugate match: \u0393_ms (source) and \u0393_ml (load), Pozar eq. form
+//   B1 = 1+|S11|\u00b2-|S22|\u00b2-|\u0394|\u00b2, B2 = 1+|S22|\u00b2-|S11|\u00b2-|\u0394|\u00b2
+//   C1 = S11-\u0394S22*, C2 = S22-\u0394S11*,  \u0393 = [B \u00b1 sqrt(B\u00b2-4|C|\u00b2)] / (2C), root with |\u0393|<1
+function addConjugateMatch(){
+  if (editingId !== null) endEdit();
+  const {S11, S12, S21, S22} = readSparams();
+
+  const delta = cSub(cMul(S11,S22), cMul(S12,S21));
+  const deltaMag2 = cAbs(delta)**2;
+  const s11m2 = cAbs(S11)**2, s22m2 = cAbs(S22)**2;
+  const s12s21mag = cAbs(cMul(S12,S21));
+  const K = (1 - s11m2 - s22m2 + deltaMag2) / (2*s12s21mag);
+
+  const ro = document.getElementById('gainReadout');
+  ro.classList.add('show');
+
+  if (K <= 1){
+    ro.classList.add('warn');
+    ro.innerHTML = `\u26A0 K = ${K.toFixed(3)} \u2014 no simultaneous conjugate match with |\u0393|&lt;1 exists (device is potentially unstable at this frequency/S-parameter set). Try a source/load stabilization network first, or check a different frequency point.`;
+    ro.scrollIntoView({block:'nearest', behavior:'smooth'});
+    return;
+  }
+
+  function solveRoot(B, C){
+    const disc = B*B - 4*cAbs(C)**2;
+    if (disc < 0) return null;
+    const sq = Math.sqrt(disc);
+    const twoC = cMul({re:2,im:0}, C);
+    const rMinus = cDiv({re:B-sq, im:0}, twoC);
+    const rPlus = cDiv({re:B+sq, im:0}, twoC);
+    if (cAbs(rMinus) < 1) return rMinus;
+    if (cAbs(rPlus) < 1) return rPlus;
+    return null;
+  }
+
+  const B1 = 1 + s11m2 - s22m2 - deltaMag2;
+  const B2 = 1 + s22m2 - s11m2 - deltaMag2;
+  const C1 = cSub(S11, cMul(delta, cConj(S22)));
+  const C2 = cSub(S22, cMul(delta, cConj(S11)));
+
+  const gms = solveRoot(B1, C1);
+  const gml = solveRoot(B2, C2);
+
+  if (!gms || !gml){
+    ro.classList.add('warn');
+    ro.innerHTML = '\u26A0 No simultaneous conjugate match with |\u0393|&lt;1 found for these S-parameters.';
+    ro.scrollIntoView({block:'nearest', behavior:'smooth'});
+    return;
+  }
+  ro.classList.remove('warn');
+
+  const magMs = cAbs(gms), angMs = Math.atan2(gms.im, gms.re)*180/Math.PI;
+  const magMl = cAbs(gml), angMl = Math.atan2(gml.im, gml.re)*180/Math.PI;
+
+  const c1 = nextColor();
+  const c2 = nextColor();
+  items.push({id: itemSeq++, sourceType:'point', type:'point', gamma:gms, label:'\\Gamma_{ms}', color:c1,
+    params:{mode:'gamma', mag:magMs, ang:angMs, label:'\\Gamma_{ms}'}});
+  items.push({id: itemSeq++, sourceType:'point', type:'point', gamma:gml, label:'\\Gamma_{ml}', color:c2,
+    params:{mode:'gamma', mag:magMl, ang:angMl, label:'\\Gamma_{ml}'}});
+  renderAll();
+
+  const s21s12ratio = Math.sqrt(cAbs(S21)**2) / cAbs(S12);
+  const GmaxDb = 10*Math.log10(s21s12ratio * (K - Math.sqrt(K*K-1)));
+  ro.innerHTML = `\u2713 \u0393<sub>ms</sub> = ${magMs.toFixed(3)}\u2220${angMs.toFixed(1)}\u00b0, \u0393<sub>ml</sub> = ${magMl.toFixed(3)}\u2220${angMl.toFixed(1)}\u00b0<br>G<sub>max</sub> = ${GmaxDb.toFixed(2)} dB`;
+}
+
+// ---------- single-stub shunt matching ----------
+let lastStubGammaL = null, lastStubGammaS = null;
+let lastStubSolutionsL = [], lastStubSolutionsS = [];
+
+function populateStubCircleSelect(){
+  const sel = document.getElementById('stubCircleSelect');
+  if (!sel) return;
+  const prevValue = sel.value;
+  sel.innerHTML = '';
+  const circleItems = items.filter(it=>it.type === 'circle');
+  if (circleItems.length === 0){
+    const opt = document.createElement('option');
+    opt.value = ''; opt.textContent = 'No circles on chart yet';
+    sel.appendChild(opt);
+    return;
+  }
+  circleItems.forEach(it=>{
+    const opt = document.createElement('option');
+    opt.value = it.id;
+    opt.textContent = it.label || it.type;
+    sel.appendChild(opt);
+  });
+  if ([...sel.options].some(o=>o.value === String(prevValue))) sel.value = prevValue;
+}
+
+// picks a specific \u0393_L off a plotted circle: either the point on the circle closest to the
+// origin (a common practical choice \u2014 it tends to minimize |\u0393_L| for good input match too),
+// or a manually chosen angle around the circle
+function gammaFromCircleItem(item, mode, angleDeg){
+  const C = item.center, r = item.radius;
+  if (mode === 'manual'){
+    const rad = angleDeg*Math.PI/180;
+    return {re: C.re + r*Math.cos(rad), im: C.im + r*Math.sin(rad)};
+  }
+  const cmag = cAbs(C);
+  if (cmag < 1e-9) return {re: r, im: 0}; // circle centered at origin (e.g. VSWR) \u2014 any angle is equally close
+  return {re: C.re - r*(C.re/cmag), im: C.im - r*(C.im/cmag)};
+}
+
+// \u0393_in seen looking into the device's input given a chosen load \u0393_L, then \u0393_S is its
+// conjugate \u2014 the standard (non-simultaneous) input match condition for a fixed operating-gain design
+function computeGammaS(gammaL){
+  const {S11, S12, S21, S22} = readSparams();
+  const num = cMul(cMul(S12, S21), gammaL);
+  const den = cSub({re:1, im:0}, cMul(S22, gammaL));
+  const gammaIn = cAdd(S11, cDiv(num, den));
+  return cConj(gammaIn);
+}
+
+// standard single-stub shunt tuner: matches a given \u0393 back to \u0393=0 (the Z\u2080 line).
+// Solves numerically for line length d (toward the generator) where the rotated point's
+// normalized conductance = 1, then finds the open- and short-circuit stub length that
+// cancels the leftover susceptance. Lengths are electrical (fractions of \u03bb), since this
+// tool has no notion of a physical frequency or dielectric.
+function stubSolutions(gammaTarget){
+  function admittanceAt(d){
+    const ang = -4*Math.PI*d;
+    const rotated = cMul(gammaTarget, {re:Math.cos(ang), im:Math.sin(ang)});
+    return cDiv({re:1,im:0}, gammaToZ(rotated));
+  }
+  const N = 4000;
+  const roots = [];
+  let prevD = 0, prevVal = admittanceAt(0).re - 1;
+  for (let i=1; i<=N; i++){
+    const d = 0.5*i/N;
+    const val = admittanceAt(d).re - 1;
+    if (isFinite(prevVal) && isFinite(val) && (prevVal < 0) !== (val < 0)){
+      let lo = prevD, hi = d, vLo = prevVal;
+      for (let k=0; k<50; k++){
+        const mid = (lo+hi)/2;
+        const vMid = admittanceAt(mid).re - 1;
+        if ((vLo < 0) === (vMid < 0)){ lo = mid; vLo = vMid; } else { hi = mid; }
+      }
+      roots.push((lo+hi)/2);
+    }
+    prevD = d; prevVal = val;
+  }
+  return roots.map(d=>{
+    const y = admittanceAt(d);
+    const Bneeded = -y.im; // stub must supply this susceptance to cancel the leftover jB
+    let lOpen = Math.atan(Bneeded)/(2*Math.PI);
+    if (lOpen < 0) lOpen += 0.5;
+    let lShort;
+    if (Math.abs(Bneeded) < 1e-9){ lShort = 0.25; }
+    else { lShort = Math.atan(-1/Bneeded)/(2*Math.PI); if (lShort < 0) lShort += 0.5; }
+    return {d, B: Bneeded, lOpen, lShort};
+  });
+}
+
+function fmtGamma(g){
+  const m = cAbs(g), a = Math.atan2(g.im, g.re)*180/Math.PI;
+  return `${m.toFixed(3)}\u2220${a.toFixed(1)}\u00b0`;
+}
+
+// standard Hammerstad microstrip synthesis (Pozar eq. 3.196-3.197): given a target Z0 and
+// substrate \u03b5r, find W/h (trying the narrow-line formula first, falling back to the
+// wide-line formula if that puts W/h above the regime it's valid for), then the effective
+// dielectric constant from the resulting geometry (eq. 3.195).
+function microstripSynthesis(z0, epsR, h){
+  const A = z0/60*Math.sqrt((epsR+1)/2) + (epsR-1)/(epsR+1)*(0.23+0.11/epsR);
+  let woh = 8*Math.exp(A) / (Math.exp(2*A) - 2);
+  if (woh > 2){
+    const B = 377*Math.PI / (2*z0*Math.sqrt(epsR));
+    woh = (2/Math.PI) * ( B - 1 - Math.log(2*B-1) + (epsR-1)/(2*epsR)*( Math.log(B-1) + 0.39 - 0.61/epsR ) );
+  }
+  const width = woh*h;
+  const epsEff = (epsR+1)/2 + (epsR-1)/2 / Math.sqrt(1+12*h/width);
+  return {width, epsEff, woh};
+}
+
+function guidedWavelengthMm(freqGHz, epsEff){
+  const c = 299792458; // m/s
+  const lambda0Mm = (c/(freqGHz*1e9)) * 1000;
+  return lambda0Mm/Math.sqrt(epsEff);
+}
+
+// reads the optional physical-parameter fields; returns null if they're not filled in
+// (in which case results just show electrical lengths, as before)
+function getPhysicalContext(){
+  const freq = parseFloat(document.getElementById('stubFreq').value);
+  const epsR = parseFloat(document.getElementById('stubEpsR').value);
+  const h = parseFloat(document.getElementById('stubHeight').value);
+  const z0 = parseFloat(document.getElementById('z0').value) || 50;
+  if (!(freq > 0) || !(epsR > 0) || !(h > 0)) return null;
+  const {width, epsEff} = microstripSynthesis(z0, epsR, h);
+  const lambdaGmm = guidedWavelengthMm(freq, epsEff);
+  return {freq, epsR, h, z0, width, epsEff, lambdaGmm};
+}
+
+function fmtStubSolutions(sols, which, phys){
+  if (sols.length === 0) return '<span>no g=1 crossing found in d \u2208 [0, 0.5\u03bb) \u2014 check the point isn\u2019t already matched or pathological</span>';
+  return sols.map((s,i)=>{
+    const dMm = phys ? ` = ${(s.d*phys.lambdaGmm).toFixed(2)} mm` : '';
+    const lOpenMm = phys ? ` (${(s.lOpen*phys.lambdaGmm).toFixed(2)} mm)` : '';
+    const lShortMm = phys ? ` (${(s.lShort*phys.lambdaGmm).toFixed(2)} mm)` : '';
+    return `<div style="margin:6px 0;padding:6px 0;border-top:1px solid rgba(255,255,255,0.08);">
+       <div>Solution ${String.fromCharCode(65+i)}: d = ${s.d.toFixed(4)}\u03bb${dMm}</div>
+       <div>l<sub>open</sub> = ${s.lOpen.toFixed(4)}\u03bb${lOpenMm} &nbsp;&nbsp; l<sub>short</sub> = ${s.lShort.toFixed(4)}\u03bb${lShortMm}</div>
+       <button class="btn secondary" style="padding:4px 10px;font-size:11px;margin-top:5px;width:auto;" onclick="addStubArc('${which}', ${i})">Show on chart</button>
+     </div>`;
+  }).join('');
+}
+
+function computeStubMatch(){
+  const ro = document.getElementById('stubReadout');
+  ro.classList.add('show');
+
+  const sel = document.getElementById('stubCircleSelect');
+  const item = items.find(it=>String(it.id) === sel.value);
+  if (!item){
+    ro.classList.add('warn');
+    ro.innerHTML = '\u26A0 Pick a circle on the chart to choose \u0393_L from first (add a gain circle, then come back here).';
+    return;
+  }
+
+  const mode = document.querySelector('input[name="stubMode"]:checked').value;
+  const angleDeg = parseFloat(document.getElementById('stubAngle').value) || 0;
+  const gammaL = gammaFromCircleItem(item, mode, angleDeg);
+  const gammaS = computeGammaS(gammaL);
+
+  // any previously-drawn construction refers to the old \u0393_L/\u0393_S and would now be stale
+  items = items.filter(it => !it.stubVis);
+  renderAll();
+
+  lastStubGammaL = gammaL;
+  lastStubGammaS = gammaS;
+  lastStubSolutionsL = stubSolutions(gammaL);
+  lastStubSolutionsS = stubSolutions(gammaS);
+
+  const phys = getPhysicalContext();
+  const physLine = phys
+    ? `Trace: w = ${phys.width.toFixed(3)} mm &nbsp; \u03b5<sub>eff</sub> = ${phys.epsEff.toFixed(3)} &nbsp; \u03bb<sub>g</sub> = ${phys.lambdaGmm.toFixed(2)} mm @ ${phys.freq} GHz<br><br>`
+    : '';
+
+  ro.classList.remove('warn');
+  ro.innerHTML = `
+    \u0393<sub>L</sub> = ${fmtGamma(gammaL)} (from "${item.label || item.type}") &nbsp;&nbsp; \u0393<sub>S</sub> = ${fmtGamma(gammaS)}<br><br>
+    ${physLine}
+    <b>Output stub \u2014 match to \u0393<sub>L</sub></b>${fmtStubSolutions(lastStubSolutionsL, 'L', phys)}<br>
+    <b>Input stub \u2014 match to \u0393<sub>S</sub></b>${fmtStubSolutions(lastStubSolutionsS, 'S', phys)}
+    <div style="margin-top:10px;display:flex;gap:8px;">
+      <button class="btn secondary" onclick="addStubResultPoint('L')" style="flex:1;">Add \u0393_L point</button>
+      <button class="btn secondary" onclick="addStubResultPoint('S')" style="flex:1;">Add \u0393_S point</button>
+    </div>
+  `;
+}
+
+// draws the classic construction, matching the standard mirrored/admittance-point
+// convention: y_target = -\u0393_target is plotted (since z and y=1/z sit at mirrored points
+// on the chart). Two arcs, nothing else:
+//   1) Line: along the constant-|\u0393| (constant VSWR) circle, from y_target to where it
+//      crosses the r=1 (\"1+jb\") circle
+//   2) Stub: along that r=1 circle itself, from the crossing straight to the center
+// Clears out any previous construction for the SAME network (L or S) first, so repeated
+// clicks never leave stale, mismatched points/arcs cluttering the chart.
+function addStubArc(which, idx){
+  const gammaTarget = which === 'L' ? lastStubGammaL : lastStubGammaS;
+  const sols = which === 'L' ? lastStubSolutionsL : lastStubSolutionsS;
+  const sol = sols && sols[idx];
+  if (!gammaTarget || !sol) return;
+
+  items = items.filter(it => it.stubVis !== which); // drop this network's previous construction
+
+  const color = nextColor();
+  const yTarget = {re: -gammaTarget.re, im: -gammaTarget.im};
+  const yLabel = which === 'L' ? 'y_L' : 'y_S';
+
+  // the mirrored admittance point \u2014 this is where the rotation actually starts from
+  items.push({id: itemSeq++, sourceType:'point', type:'point', gamma:yTarget, label:yLabel, color, stubVis:which,
+    params:{mode:'gamma', mag:cAbs(yTarget), ang:Math.atan2(yTarget.im, yTarget.re)*180/Math.PI, label:yLabel}});
+
+  // Line: rotate from y_target toward the generator by d, landing on the r=1 circle
+  const netName = which === 'L' ? 'd\u2081' : 'd\u2082';
+  const lineLabel = `${netName} = ${sol.d.toFixed(3)}\u03bb`;
+  items.push({id: itemSeq++, sourceType:'arc', type:'arc', gamma:yTarget, d:sol.d, color, label:lineLabel, stubVis:which,
+    params:{re:yTarget.re, im:yTarget.im, d:sol.d, label:lineLabel}});
+
+  // Stub: walk the r=1 circle from that landing point to the origin (susceptance -> 0).
+  // sol.B is the *compensating* susceptance the stub must supply (defined as -Im{y(d)} in
+  // stubSolutions); the r1 arc needs the actual leftover susceptance at that point, i.e. -sol.B.
+  const stubLabel = `l = ${sol.lOpen.toFixed(3)}\u03bb (o) / ${sol.lShort.toFixed(3)}\u03bb (s)`;
+  items.push({id: itemSeq++, sourceType:'r1arc', type:'r1arc', x:-sol.B, color, label:stubLabel, stubVis:which,
+    params:{x:-sol.B}});
+
+  renderAll();
+}
+
+function addStubResultPoint(which){
+  const g = which === 'L' ? lastStubGammaL : lastStubGammaS;
+  if (!g) return;
+  const mag = cAbs(g), ang = Math.atan2(g.im, g.re)*180/Math.PI;
+  const label = which === 'L' ? '\\Gamma_L' : '\\Gamma_S';
+  const color = nextColor();
+  items.push({id: itemSeq++, sourceType:'point', type:'point', gamma:g, label, color, stubVis:which,
+    params:{mode:'gamma', mag, ang, label}});
+  renderAll();
+}
+
+function addCircle(){
+  const mode = document.querySelector('input[name="circMode"]:checked').value;
+  let center;
+  if (mode === 'polar'){
+    const mag = parseFloat(document.getElementById('circMag').value);
+    const ang = parseFloat(document.getElementById('circAng').value);
+    center = polar(mag, ang);
+  } else {
+    center = {re: parseFloat(document.getElementById('circRe').value), im: parseFloat(document.getElementById('circIm').value)};
+  }
+  const radius = parseFloat(document.getElementById('circR').value);
+  const rawLabel = document.getElementById('circLabel').value;
+  const label = rawLabel || 'Circle';
+  const color = colorForCommit('circle');
+  const params = mode === 'polar'
+    ? {mode, mag: parseFloat(document.getElementById('circMag').value), ang: parseFloat(document.getElementById('circAng').value), radius, label: rawLabel}
+    : {mode, re: parseFloat(document.getElementById('circRe').value), im: parseFloat(document.getElementById('circIm').value), radius, label: rawLabel};
+  commitItem('circle', {type:'circle', center, radius, label, color, params});
+}
+
+function addVSWR(){
+  const v = parseFloat(document.getElementById('vswrVal').value);
+  const radius = (v-1)/(v+1);
+  const color = colorForCommit('vswr');
+  commitItem('vswr', {type:'circle', center:{re:0,im:0}, radius, label:`VSWR = ${v}`, color, params:{vswr:v}});
+}
+
+function addPoint(){
+  const mode = document.querySelector('input[name="ptMode"]:checked').value;
+  let gamma, label, params;
+  const rawLabel = document.getElementById('ptLabel').value;
+  if (mode === 'gamma'){
+    const mag = parseFloat(document.getElementById('ptMag').value);
+    const ang = parseFloat(document.getElementById('ptAng').value);
+    gamma = polar(mag, ang);
+    label = rawLabel || `\u0393 = ${mag}\u2220${ang}\u00b0`;
+    params = {mode, mag, ang, label: rawLabel};
+  } else {
+    const z0 = parseFloat(document.getElementById('z0').value) || 50;
+    const Rr = parseFloat(document.getElementById('ptR').value);
+    const Xx = parseFloat(document.getElementById('ptX').value);
+    gamma = zToGamma(Rr/z0, Xx/z0);
+    label = rawLabel || `Z = ${Rr}${Xx>=0?'+':''}${Xx}j \u03a9`;
+    params = {mode, R:Rr, X:Xx, label: rawLabel};
+  }
+  const color = colorForCommit('point');
+  commitItem('point', {type:'point', gamma, label, color, params});
+}
+
+function addLine(){
+  const re1 = parseFloat(document.getElementById('lnRe1').value), im1 = parseFloat(document.getElementById('lnIm1').value);
+  const re2 = parseFloat(document.getElementById('lnRe2').value), im2 = parseFloat(document.getElementById('lnIm2').value);
+  const rawLabel = document.getElementById('lnLabel').value;
+  const color = colorForCommit('line');
+  commitItem('line', {type:'line', p1:{re:re1,im:im1}, p2:{re:re2,im:im2}, label: rawLabel, color, params:{re1,im1,re2,im2,label:rawLabel}});
+}
+
+function deleteItem(id){
+  items = items.filter(it=>it.id !== id);
+  if (editingId === id) endEdit();
+  renderAll();
+}
+
+function clearAll(){
+  items = [];
+  endEdit();
+  renderAll();
+}
+
+// ---------- edit-in-place ----------
+const ADD_LABELS = {
+  stability: 'Add stability circle', gain: 'Add gain circle', circle: 'Add circle',
+  vswr: 'Add VSWR circle', point: 'Add point', line: 'Add line'
+};
+const UPDATE_LABELS = {
+  stability: 'Update stability circle', gain: 'Update gain circle', circle: 'Update circle',
+  vswr: 'Update VSWR circle', point: 'Update point', line: 'Update line'
+};
+
+function setVal(id, v){
+  if (v === undefined || v === null || Number.isNaN(v)) return;
+  document.getElementById(id).value = v;
+}
+function setRadio(name, value){
+  const el = document.querySelector(`input[name="${name}"][value="${value}"]`);
+  if (el){ el.checked = true; el.dispatchEvent(new Event('change')); }
+}
+
+function startEdit(item){
+  const type = item.sourceType;
+  if (!type || !item.params) return; // items without captured params (shouldn't normally happen) aren't editable
+
+  const tabEl = document.querySelector(`.tab[data-mode="${type}"]`);
+  if (!tabEl) return; // no matching form for this type (e.g. stub-match arcs) \u2014 not editable, delete-only
+
+  editingId = item.id;
+  editingSourceType = type;
+  tabEl.click(); // reuses the existing tab-switch logic (panel + sparam block visibility)
+
+  const p = item.params;
+  if (type === 'stability'){
+    setVal('s11m',p.s11m); setVal('s11a',p.s11a); setVal('s21m',p.s21m); setVal('s21a',p.s21a);
+    setVal('s12m',p.s12m); setVal('s12a',p.s12a); setVal('s22m',p.s22m); setVal('s22a',p.s22a);
+    setRadio('scPort', p.port);
+  } else if (type === 'gain'){
+    setVal('s11m',p.s11m); setVal('s11a',p.s11a); setVal('s21m',p.s21m); setVal('s21a',p.s21a);
+    setVal('s12m',p.s12m); setVal('s12a',p.s12a); setVal('s22m',p.s22m); setVal('s22a',p.s22a);
+    setVal('gainDb', p.gainDb);
+    document.getElementById('gainLabel').value = p.label || '';
+  } else if (type === 'circle'){
+    setRadio('circMode', p.mode);
+    if (p.mode === 'polar'){ setVal('circMag',p.mag); setVal('circAng',p.ang); }
+    else { setVal('circRe',p.re); setVal('circIm',p.im); }
+    setVal('circR', p.radius);
+    document.getElementById('circLabel').value = p.label || '';
+  } else if (type === 'vswr'){
+    setVal('vswrVal', p.vswr);
+  } else if (type === 'point'){
+    setRadio('ptMode', p.mode);
+    if (p.mode === 'z'){ setVal('ptR',p.R); setVal('ptX',p.X); }
+    else { setVal('ptMag',p.mag); setVal('ptAng',p.ang); }
+    document.getElementById('ptLabel').value = p.label || '';
+  } else if (type === 'line'){
+    setVal('lnRe1',p.re1); setVal('lnIm1',p.im1); setVal('lnRe2',p.re2); setVal('lnIm2',p.im2);
+    document.getElementById('lnLabel').value = p.label || '';
+  }
+
+  const idx = PALETTE.indexOf(item.color);
+  colorIdx = idx >= 0 ? idx : 0;
+  buildSwatches();
+
+  const btn = document.getElementById('btn-' + type);
+  if (btn) btn.textContent = UPDATE_LABELS[type];
+
+  const banner = document.getElementById('editBanner');
+  document.getElementById('editBannerText').textContent = `Editing "${item.label || type}"`;
+  banner.style.display = 'flex';
+
+  renderList(); // to apply the .editing row highlight
+}
+
+function endEdit(){
+  if (editingSourceType){
+    const btn = document.getElementById('btn-' + editingSourceType);
+    if (btn) btn.textContent = ADD_LABELS[editingSourceType];
+  }
+  editingId = null;
+  editingSourceType = null;
+  document.getElementById('editBanner').style.display = 'none';
+}
+
+function rectsOverlap(a, b){
+  return !(a.x+a.width < b.x || b.x+b.width < a.x || a.y+a.height < b.y || b.y+b.height < a.y);
+}
+
+// ---------- title auto-placement ----------
+// Scores how much a candidate rect (the title's bounding box) conflicts with the plotted
+// circles/lines, so the title can hop to whichever corner is currently clearest.
+function circleIntersectsRect(cx, cy, r, rect){
+  const nearestX = Math.min(Math.max(cx, rect.x), rect.x + rect.width);
+  const nearestY = Math.min(Math.max(cy, rect.y), rect.y + rect.height);
+  const minDist = Math.hypot(cx - nearestX, cy - nearestY);
+  const corners = [[rect.x,rect.y],[rect.x+rect.width,rect.y],[rect.x,rect.y+rect.height],[rect.x+rect.width,rect.y+rect.height]];
+  let maxDist = 0;
+  corners.forEach(([px,py])=>{ maxDist = Math.max(maxDist, Math.hypot(cx-px, cy-py)); });
+  // the circle's boundary passes through the rect whenever its radius falls between the
+  // nearest and farthest distance from center to the rect
+  return minDist <= r && r <= maxDist;
+}
+
+function pointInRect(p, rect){
+  return p.x >= rect.x && p.x <= rect.x+rect.width && p.y >= rect.y && p.y <= rect.y+rect.height;
+}
+
+function segTouches(p1,p2,p3,p4){
+  const ccw = (A,B,C)=> (C.y-A.y)*(B.x-A.x) > (B.y-A.y)*(C.x-A.x);
+  return (ccw(p1,p3,p4) !== ccw(p2,p3,p4)) && (ccw(p1,p2,p3) !== ccw(p1,p2,p4));
+}
+
+function segmentIntersectsRect(a, b, rect){
+  if (pointInRect(a,rect) || pointInRect(b,rect)) return true;
+  const c = [
+    {x:rect.x,y:rect.y}, {x:rect.x+rect.width,y:rect.y},
+    {x:rect.x+rect.width,y:rect.y+rect.height}, {x:rect.x,y:rect.y+rect.height}
+  ];
+  for (let i=0;i<4;i++){ if (segTouches(a,b,c[i],c[(i+1)%4])) return true; }
+  return false;
+}
+
+function rectConflictScore(rect){
+  let score = 0;
+  items.forEach(it=>{
+    if (it.type === 'circle'){
+      const c = toSvg(it.center.re, it.center.im);
+      if (circleIntersectsRect(c.x, c.y, it.radius*R, rect)) score++;
+    } else if (it.type === 'line'){
+      const a = toSvg(it.p1.re, it.p1.im), b = toSvg(it.p2.re, it.p2.im);
+      if (segmentIntersectsRect(a, b, rect)) score++;
+    }
+  });
+  return score;
+}
+
+// moves the title to whichever corner currently has the fewest plotted circles/lines
+// passing through it; runs after every render since adding/removing items can change the winner
+function positionTitle(){
+  const t = document.getElementById('svgTitle');
+  let bbox;
+  try{ bbox = t.getBBox(); }catch(e){ return; }
+  const curX = parseFloat(t.getAttribute('x')) || 0;
+  const curY = parseFloat(t.getAttribute('y')) || 0;
+  const bx0 = bbox.x - curX, by0 = bbox.y - curY;
+  const w = bbox.width, h = bbox.height;
+  const M = 22;
+
+  const candidates = [
+    {left:M, top:M},                 // top-left
+    {left:640-M-w, top:M},           // top-right
+    {left:M, top:640-M-h},           // bottom-left
+    {left:640-M-w, top:640-M-h}      // bottom-right
+  ];
+
+  let best = candidates[0], bestScore = Infinity;
+  candidates.forEach(cand=>{
+    const score = rectConflictScore({x:cand.left, y:cand.top, width:w, height:h});
+    if (score < bestScore){ bestScore = score; best = cand; }
+  });
+
+  t.setAttribute('x', best.left - bx0);
+  t.setAttribute('y', best.top - by0);
+}
+
+// ---------- lightweight LaTeX-subset for labels ----------
+// Supports \GreekLetters, common symbols (\pm \times \cdot \infty \angle \deg ...),
+// and ^{...}/^x superscripts, _{...}/_x subscripts. Not a full LaTeX engine — built for
+// short chart labels like \Gamma_s, S_{21}, Z_0, \theta, V_{SWR} rather than full equations.
+const MATH_GREEK = {
+  alpha:'\u03B1',beta:'\u03B2',gamma:'\u03B3',Gamma:'\u0393',delta:'\u03B4',Delta:'\u0394',
+  epsilon:'\u03B5',zeta:'\u03B6',eta:'\u03B7',theta:'\u03B8',Theta:'\u0398',iota:'\u03B9',
+  kappa:'\u03BA',lambda:'\u03BB',Lambda:'\u039B',mu:'\u03BC',nu:'\u03BD',xi:'\u03BE',Xi:'\u039E',
+  pi:'\u03C0',Pi:'\u03A0',rho:'\u03C1',sigma:'\u03C3',Sigma:'\u03A3',tau:'\u03C4',
+  upsilon:'\u03C5',phi:'\u03C6',Phi:'\u03A6',chi:'\u03C7',psi:'\u03C8',Psi:'\u03A8',
+  omega:'\u03C9',Omega:'\u03A9'
+};
+const MATH_SYMBOLS = {
+  pm:'\u00B1', mp:'\u2213', times:'\u00D7', cdot:'\u00B7', circ:'\u00B0', deg:'\u00B0',
+  infty:'\u221E', angle:'\u2220', approx:'\u2248', leq:'\u2264', geq:'\u2265', neq:'\u2260',
+  to:'\u2192', rightarrow:'\u2192', leftarrow:'\u2190', partial:'\u2202', nabla:'\u2207', sqrt:'\u221A'
+};
+
+function parseMathTokens(str){
+  str = (str || '').replace(/\$/g, '');
+  const tokens = [];
+  let buf = '', i = 0;
+  const n = str.length;
+  const flush = (mode)=>{ if (buf) tokens.push({text:buf, mode}); buf=''; };
+
+  while (i < n){
+    const c = str[i];
+    if (c === '\\'){
+      flush('normal');
+      i++;
+      let name = '';
+      while (i<n && /[a-zA-Z]/.test(str[i])){ name += str[i]; i++; }
+      tokens.push({text: MATH_GREEK[name] || MATH_SYMBOLS[name] || name, mode:'normal'});
+      continue;
+    }
+    if (c === '^' || c === '_'){
+      flush('normal');
+      const supMode = c==='^' ? 'sup' : 'sub';
+      i++;
+      if (str[i] === '{'){
+        i++; let inner='';
+        while (i<n && str[i] !== '}'){ inner+=str[i]; i++; }
+        i++;
+        parseMathTokens(inner).forEach(t=> tokens.push({text:t.text, mode: supMode}));
+      } else if (i<n){
+        tokens.push({text: str[i], mode: supMode});
+        i++;
+      }
+      continue;
+    }
+    buf += c; i++;
+  }
+  flush('normal');
+  return tokens.filter(t=>t.text.length>0);
+}
+
+// replaces a <text> element's content with tspans that render sub/superscripts and symbols
+function applyMathText(textEl, raw){
+  while (textEl.firstChild) textEl.removeChild(textEl.firstChild);
+  const baseSize = parseFloat(textEl.getAttribute('font-size')) || 11;
+  let currentShift = 0;
+  parseMathTokens(raw).forEach(tok=>{
+    const tspan = document.createElementNS(NS,'tspan');
+    let targetShift = 0, fontSize = baseSize;
+    if (tok.mode === 'sup'){ targetShift = -0.32*baseSize; fontSize = baseSize*0.7; }
+    else if (tok.mode === 'sub'){ targetShift = 0.22*baseSize; fontSize = baseSize*0.7; }
+    const dy = targetShift - currentShift;
+    if (dy !== 0) tspan.setAttribute('dy', dy.toFixed(2));
+    tspan.setAttribute('font-size', fontSize.toFixed(2));
+    tspan.textContent = tok.text;
+    textEl.appendChild(tspan);
+    currentShift = targetShift;
+  });
+}
+
+// draws a text label with a paper-colored backing so it stays legible over grid lines
+// and other shapes. Clamping happens AFTER measuring the actual text box, so long labels
+// (e.g. "Input stability (\u0393s)") get pulled fully back on-canvas rather than just having
+// their anchor point nudged, and labels are also pushed clear of the chart title.
+function currentZoomScale(){
+  return Math.min(1, viewBox.w/640);
+}
+
+function addLabel(g, x, y, text, color, opts){
+  opts = opts || {};
+  const zs = currentZoomScale();
+  const anchor = opts.anchor || 'middle';
+  const fontSize = (opts.fontSize || 10.5) * zs;
+  const weight = opts.weight != null ? opts.weight : 500;
+
+  const t = document.createElementNS(NS,'text');
+  t.setAttribute('x', x); t.setAttribute('y', y);
+  t.setAttribute('font-size', fontSize); t.setAttribute('fill', color);
+  t.setAttribute('text-anchor', anchor);
+  t.setAttribute('font-family', opts.mono ? "'IBM Plex Mono', monospace" : 'Inter, sans-serif');
+  t.setAttribute('font-weight', weight);
+  applyMathText(t, text);
+  g.appendChild(t);
+
+  try{
+    // keep-inside-bounds clamps against the CURRENT viewBox, not the fixed 640 canvas,
+    // so labels stay sensible whether zoomed out (viewBox = full canvas) or zoomed in
+    const padX = 8*zs, padTop = 16*zs, padBottom = 8*zs;
+    const boundsL = viewBox.x, boundsT = viewBox.y, boundsR = viewBox.x+viewBox.w, boundsB = viewBox.y+viewBox.h;
+    let bbox = t.getBBox();
+
+    // 1) keep the label fully inside the visible area
+    let dx = 0, dy = 0;
+    if (bbox.x < boundsL+padX) dx = (boundsL+padX) - bbox.x;
+    if (bbox.x + bbox.width > boundsR - padX) dx = (boundsR - padX) - (bbox.x + bbox.width);
+    if (bbox.y < boundsT+padTop) dy = (boundsT+padTop) - bbox.y;
+    if (bbox.y + bbox.height > boundsB - padBottom) dy = (boundsB - padBottom) - (bbox.y + bbox.height);
+    if (dx !== 0 || dy !== 0){
+      t.setAttribute('x', x + dx);
+      t.setAttribute('y', y + dy);
+      bbox = t.getBBox();
+    }
+
+    // 2) keep the label clear of the chart title, wherever it currently sits
+    const titleEl = document.getElementById('svgTitle');
+    if (titleEl){
+      const tb = titleEl.getBBox();
+      const keepout = {x: tb.x-10, y: tb.y-10, width: tb.width+20, height: tb.height+20};
+      if (rectsOverlap(bbox, keepout)){
+        const curY = parseFloat(t.getAttribute('y'));
+        const shiftDown = (keepout.y + keepout.height) - bbox.y + 4;
+        t.setAttribute('y', curY + shiftDown);
+        bbox = t.getBBox();
+        // re-clamp to the bottom edge in the unlikely case the push-down overshot it
+        if (bbox.y + bbox.height > boundsB - padBottom){
+          const dy2 = (boundsB - padBottom) - (bbox.y + bbox.height);
+          t.setAttribute('y', parseFloat(t.getAttribute('y')) + dy2);
+          bbox = t.getBBox();
+        }
+      }
+    }
+
+    const pad = (opts.pad != null ? opts.pad : 3) * zs;
+    const rect = document.createElementNS(NS,'rect');
+    rect.setAttribute('x', bbox.x - pad);
+    rect.setAttribute('y', bbox.y - pad);
+    rect.setAttribute('width', bbox.width + pad*2);
+    rect.setAttribute('height', bbox.height + pad*2);
+    rect.setAttribute('rx', 2);
+    rect.setAttribute('fill', currentPaper);
+    rect.setAttribute('opacity', 0.82);
+    g.insertBefore(rect, t);
+
+    if (opts.dragId){
+      // move the text+rect pair into a translatable wrapper so it can be manually dragged;
+      // auto-placement above already computed the "natural" position, this offset just nudges it
+      const wrapper = document.createElementNS(NS,'g');
+      wrapper.setAttribute('class', 'draggable-label');
+      const offset = labelOffsets[opts.dragId] || {dx:0, dy:0};
+      wrapper.setAttribute('transform', `translate(${offset.dx},${offset.dy})`);
+      g.removeChild(rect); g.removeChild(t);
+      wrapper.appendChild(rect); wrapper.appendChild(t);
+      g.appendChild(wrapper);
+      wireLabelDrag(wrapper, opts.dragId);
+      return wrapper;
+    }
+  }catch(e){ /* getBBox can fail before layout; label still renders, just without backing */ }
+
+  return t;
+}
+
+// ---------- render ----------
+function renderAll(){
+  const g = document.getElementById('userLayer');
+  const lg = document.getElementById('userLabels');
+  g.innerHTML = '';
+  lg.innerHTML = '';
+
+  renderStabilityShading();
+
+  // pick the title's corner first, using the fewest-conflicts scoring, so the label
+  // keepout check below (which reads the title's live position) is already correct
+  positionTitle();
+
+  const pendingLabels = [];
+  const zs = currentZoomScale();
+  const showArcLabels = document.getElementById('arcLabelToggle').checked;
+
+  items.forEach(it=>{
+    if (it.type === 'circle'){
+      const c = toSvg(it.center.re, it.center.im);
+      const el = document.createElementNS(NS,'circle');
+      el.setAttribute('cx', c.x); el.setAttribute('cy', c.y); el.setAttribute('r', it.radius*R);
+      el.setAttribute('fill','none'); el.setAttribute('stroke', it.color); el.setAttribute('stroke-width', 2*zs);
+      g.appendChild(el);
+      pendingLabels.push({x: c.x, y: c.y - it.radius*R - 7*zs, text: it.label, color: it.color, anchor:'middle', id: it.id});
+    } else if (it.type === 'point'){
+      const p = toSvg(it.gamma.re, it.gamma.im);
+      const el = document.createElementNS(NS,'circle');
+      el.setAttribute('cx', p.x); el.setAttribute('cy', p.y); el.setAttribute('r', 4.5*zs);
+      el.setAttribute('fill', it.color); el.setAttribute('stroke', currentPaper); el.setAttribute('stroke-width', 1*zs);
+      g.appendChild(el);
+      pendingLabels.push({x: p.x + 8*zs, y: p.y - 8*zs, text: it.label, color: it.color, anchor:'start', id: it.id});
+    } else if (it.type === 'line'){
+      const a = toSvg(it.p1.re, it.p1.im), b = toSvg(it.p2.re, it.p2.im);
+      const el = document.createElementNS(NS,'line');
+      el.setAttribute('x1', a.x); el.setAttribute('y1', a.y);
+      el.setAttribute('x2', b.x); el.setAttribute('y2', b.y);
+      el.setAttribute('stroke', it.color); el.setAttribute('stroke-width', 2*zs);
+      g.appendChild(el);
+      if (it.label){
+        pendingLabels.push({x: (a.x+b.x)/2 + 6*zs, y: (a.y+b.y)/2 - 6*zs, text: it.label, color: it.color, anchor:'start', id: it.id});
+      }
+    } else if (it.type === 'arc'){
+      const arc = arcPathD(it.gamma, it.d);
+      const markerIdx = Math.max(0, PALETTE.indexOf(it.color));
+      const el = document.createElementNS(NS,'path');
+      el.setAttribute('d', arc.d);
+      el.setAttribute('fill', 'none'); el.setAttribute('stroke', it.color); el.setAttribute('stroke-width', 2*zs);
+      el.setAttribute('marker-end', `url(#arrow${markerIdx})`);
+      g.appendChild(el);
+      // small marker at the endpoint (where the rotation reaches g=1, i.e. where the stub taps in)
+      const endDot = document.createElementNS(NS,'circle');
+      endDot.setAttribute('cx', arc.endPt.x); endDot.setAttribute('cy', arc.endPt.y); endDot.setAttribute('r', 3*zs);
+      endDot.setAttribute('fill', it.color);
+      g.appendChild(endDot);
+      if (it.label && showArcLabels){
+        pendingLabels.push({x: arc.midPt.x, y: arc.midPt.y, text: it.label, color: it.color, anchor:'middle', id: it.id});
+      }
+    } else if (it.type === 'r1arc'){
+      const arc = r1ArcPathD(it.x);
+      if (arc){
+        const markerIdx = Math.max(0, PALETTE.indexOf(it.color));
+        const el = document.createElementNS(NS,'path');
+        el.setAttribute('d', arc.d);
+        el.setAttribute('fill', 'none'); el.setAttribute('stroke', it.color); el.setAttribute('stroke-width', 2*zs);
+        el.setAttribute('marker-end', `url(#arrow${markerIdx})`);
+        g.appendChild(el);
+        if (it.label && showArcLabels){
+          pendingLabels.push({x: arc.midPt.x, y: arc.midPt.y, text: it.label, color: it.color, anchor:'middle', id: it.id});
+        }
+      }
+    }
+  });
+
+  // labels drawn last, into a layer that sits above every shape on the chart,
+  // so no circle or line can ever cover a label regardless of add order
+  pendingLabels.forEach(l=>{
+    addLabel(lg, l.x, l.y, l.text, l.color, {anchor: l.anchor, dragId: l.id});
+  });
+
+  renderList();
+  populateStubCircleSelect();
+}
+
+function renderList(){
+  const list = document.getElementById('itemList');
+  list.innerHTML = '';
+  if (items.length === 0){
+    const empty = document.createElement('p');
+    empty.className = 'note';
+    empty.textContent = 'Nothing added yet.';
+    list.appendChild(empty);
+    return;
+  }
+  items.forEach(it=>{
+    const row = document.createElement('div');
+    row.className = 'item-row' + (it.id === editingId ? ' editing' : '');
+    const dot = document.createElement('div');
+    dot.className = 'item-dot';
+    dot.style.background = it.color;
+    const label = document.createElement('div');
+    label.className = 'item-label';
+    label.textContent = it.label || it.type;
+    const meta = document.createElement('div');
+    meta.className = 'item-meta';
+    meta.textContent = it.type;
+    const del = document.createElement('button');
+    del.className = 'item-del';
+    del.innerHTML = '&times;';
+    del.onclick = (e)=>{ e.stopPropagation(); deleteItem(it.id); };
+    row.appendChild(dot); row.appendChild(label); row.appendChild(meta); row.appendChild(del);
+    row.onclick = ()=> startEdit(it);
+    list.appendChild(row);
+  });
+}
+
+// ---------- title ----------
+document.getElementById('chartTitle').addEventListener('input', (e)=>{
+  applyMathText(document.getElementById('svgTitle'), e.target.value);
+  renderAll();
+});
+
+// ---------- export ----------
+function exportSVG(){
+  const svgEl = document.getElementById('chart');
+  const clone = svgEl.cloneNode(true);
+  clone.querySelector('#bgRect').setAttribute('fill', currentPaper);
+  const serializer = new XMLSerializer();
+  const str = serializer.serializeToString(clone);
+  const blob = new Blob([str], {type:'image/svg+xml;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (document.getElementById('chartTitle').value || 'smith-chart').replace(/\s+/g,'_') + '.svg';
+  a.click();
+}
+
+function exportPNG(){
+  const svgEl = document.getElementById('chart');
+  const clone = svgEl.cloneNode(true);
+  clone.querySelector('#bgRect').setAttribute('fill', currentPaper);
+  const serializer = new XMLSerializer();
+  const str = serializer.serializeToString(clone);
+  const blob = new Blob([str], {type:'image/svg+xml;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const img = new Image();
+  img.onload = function(){
+    const scale = 2;
+    const canvas = document.createElement('canvas');
+    canvas.width = 640*scale; canvas.height = 640*scale;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = currentPaper;
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    URL.revokeObjectURL(url);
+    canvas.toBlob(function(b){
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(b);
+      a.download = (document.getElementById('chartTitle').value || 'smith-chart').replace(/\s+/g,'_') + '.png';
+      a.click();
+    });
+  };
+  img.src = url;
+}
+
+// ---------- session save/load ----------
+function exportSession(){
+  const data = {
+    version: 1,
+    title: document.getElementById('chartTitle').value,
+    z0: document.getElementById('z0').value,
+    paper: currentPaper,
+    sparams: sparamValues(),
+    items: items.map(it=>({
+      _savedId: it.id,
+      type: it.type, center: it.center, radius: it.radius, gamma: it.gamma, d: it.d, x: it.x,
+      p1: it.p1, p2: it.p2, label: it.label, color: it.color, stubVis: it.stubVis,
+      sourceType: it.sourceType, params: it.params
+    })),
+    labelOffsets: labelOffsets
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (document.getElementById('chartTitle').value || 'smith-session').replace(/\s+/g,'_') + '.json';
+  a.click();
+}
+
+function importSessionFile(e){
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    try{
+      const data = JSON.parse(ev.target.result);
+      endEdit();
+      const oldToNew = {};
+      items = (data.items || []).map(it=>{
+        const newId = itemSeq++;
+        if (it._savedId !== undefined) oldToNew[it._savedId] = newId;
+        const clean = Object.assign({}, it, {id: newId});
+        delete clean._savedId;
+        return clean;
+      });
+      labelOffsets = {};
+      if (data.labelOffsets){
+        Object.keys(data.labelOffsets).forEach(oldId=>{
+          const newId = oldToNew[oldId];
+          if (newId !== undefined) labelOffsets[newId] = data.labelOffsets[oldId];
+        });
+      }
+      if (data.title !== undefined){
+        document.getElementById('chartTitle').value = data.title;
+        applyMathText(document.getElementById('svgTitle'), data.title);
+      }
+      if (data.z0 !== undefined) document.getElementById('z0').value = data.z0;
+      if (data.paper) setPaperColor(data.paper);
+      if (data.sparams){
+        const sp = data.sparams;
+        ['s11m','s11a','s21m','s21a','s12m','s12a','s22m','s22a'].forEach(id=>{
+          if (sp[id] !== undefined) document.getElementById(id).value = sp[id];
+        });
+      }
+      renderAll();
+    }catch(err){
+      alert('Could not read this file as a Smith Bench session (expected .json saved from "Save session").');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = ''; // allow re-selecting the same file later
+}
+document.getElementById('sessionFile').addEventListener('change', importSessionFile);
+
+// ---------- cursor readout ----------
+function updateCursorReadout(re, im){
+  const el = document.getElementById('cursorReadout');
+  const mag = Math.hypot(re, im);
+  if (mag > 1.5){ resetCursorReadout(); return; }
+  const ang = Math.atan2(im, re)*180/Math.PI;
+  const z0 = parseFloat(document.getElementById('z0').value) || 50;
+
+  let zStr = '\u2014';
+  if (mag < 0.999){
+    const z = gammaToZ({re, im});
+    const Rr = z.re*z0, Xx = z.im*z0;
+    zStr = `${Rr.toFixed(1)} ${Xx>=0?'+':'\u2212'} j${Math.abs(Xx).toFixed(1)} \u03a9`;
+  }
+  const vswrStr = mag < 0.999 ? ((1+mag)/(1-mag)).toFixed(2) : '\u221E';
+  const rlStr = mag > 0.0005 ? (-20*Math.log10(mag)).toFixed(1) + ' dB' : '\u221E';
+
+  el.innerHTML = `\u0393: <b>${mag.toFixed(3)}\u2220${ang.toFixed(1)}\u00b0</b> &nbsp;&nbsp; Z: <b>${zStr}</b> &nbsp;&nbsp; VSWR: <b>${vswrStr}</b> &nbsp;&nbsp; RL: <b>${rlStr}</b>`;
+}
+
+function resetCursorReadout(){
+  document.getElementById('cursorReadout').innerHTML = '\u0393: <b>\u2014</b> &nbsp;&nbsp; Z: <b>\u2014</b> &nbsp;&nbsp; VSWR: <b>\u2014</b> &nbsp;&nbsp; RL: <b>\u2014</b>';
+}
+
+// ---------- sidebar resize ----------
+(function wireSidebarResize(){
+  const handle = document.getElementById('resizeHandle');
+  const sidebar = document.querySelector('.sidebar');
+  let dragging = false, startX = 0, startWidth = 0;
+
+  handle.addEventListener('mousedown', function(evt){
+    dragging = true;
+    startX = evt.clientX;
+    startWidth = sidebar.getBoundingClientRect().width;
+    handle.classList.add('dragging');
+    document.body.style.userSelect = 'none';
+    evt.preventDefault();
+  });
+
+  window.addEventListener('mousemove', function(evt){
+    if (!dragging) return;
+    const newWidth = startWidth + (evt.clientX - startX);
+    const clamped = Math.min(640, Math.max(280, newWidth));
+    sidebar.style.width = clamped + 'px';
+  });
+
+  window.addEventListener('mouseup', function(){
+    if (!dragging) return;
+    dragging = false;
+    handle.classList.remove('dragging');
+    document.body.style.userSelect = '';
+  });
+})();
+
+(function wireCursorReadout(){
+  const svg = document.getElementById('chart');
+  svg.addEventListener('mousemove', function(evt){
+    const pt = svg.createSVGPoint();
+    pt.x = evt.clientX; pt.y = evt.clientY;
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return;
+    const loc = pt.matrixTransform(ctm.inverse());
+    const re = (loc.x - CX)/R;
+    const im = (CY - loc.y)/R;
+    updateCursorReadout(re, im);
+  });
+  svg.addEventListener('mouseleave', resetCursorReadout);
+})();
+
+// ---------- pan / zoom ----------
+// Everything else on the chart is drawn in the same fixed 640x640 coordinate space
+// regardless of zoom \u2014 zooming only changes which rectangle of that space the SVG's
+// viewBox displays, so none of the geometry code above needs to know zoom exists.
+function applyViewBox(){
+  document.getElementById('chart').setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`);
+  const tier = gridTierForZoom();
+  if (tier !== builtGridTier) buildGrid(tier); // rebuilds shape + labels together
+  else buildGridLabels(tier); // shape unchanged, but labels still need re-sizing/positioning
+  renderAll();
+}
+
+function clampViewBox(){
+  viewBox.w = Math.min(640, Math.max(24, viewBox.w));
+  viewBox.h = Math.min(640, Math.max(24, viewBox.h));
+}
+
+// zooms keeping a specific point (in the CURRENT viewBox's coordinate space) fixed on screen
+function zoomAt(loc, factor){
+  let newW = viewBox.w * factor, newH = viewBox.h * factor;
+  newW = Math.min(640, Math.max(24, newW));
+  newH = Math.min(640, Math.max(24, newH));
+  const fracX = (loc.x - viewBox.x) / viewBox.w, fracY = (loc.y - viewBox.y) / viewBox.h;
+  viewBox.x = loc.x - fracX*newW;
+  viewBox.y = loc.y - fracY*newH;
+  viewBox.w = newW; viewBox.h = newH;
+  applyViewBox();
+}
+
+// button-triggered zoom (+/-): zoom toward the center of the current view, since there's no cursor position to anchor to
+function zoomStep(factor){
+  const center = {x: viewBox.x + viewBox.w/2, y: viewBox.y + viewBox.h/2};
+  zoomAt(center, factor);
+}
+
+function resetZoom(){
+  viewBox = {x:0, y:0, w:640, h:640};
+  applyViewBox();
+}
+
+function resetLabelPositions(){
+  labelOffsets = {};
+  renderAll();
+}
+
+function onAdmittanceToggle(){
+  buildGrid(builtGridTier >= 0 ? builtGridTier : 0);
+}
+
+(function wireZoomPan(){
+  const svg = document.getElementById('chart');
+
+  svg.addEventListener('wheel', function(evt){
+    evt.preventDefault();
+    const pt = svg.createSVGPoint();
+    pt.x = evt.clientX; pt.y = evt.clientY;
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return;
+    const loc = pt.matrixTransform(ctm.inverse());
+    const factor = evt.deltaY < 0 ? (1/1.15) : 1.15;
+    zoomAt(loc, factor);
+  }, {passive:false});
+
+  let panning = false, panStartClient = {x:0,y:0}, panStartViewBox = {x:0,y:0};
+  svg.addEventListener('mousedown', function(evt){
+    panning = true;
+    panStartClient = {x:evt.clientX, y:evt.clientY};
+    panStartViewBox = {x:viewBox.x, y:viewBox.y};
+  });
+  window.addEventListener('mousemove', function(evt){
+    if (!panning) return;
+    const rect = svg.getBoundingClientRect();
+    if (rect.width === 0) return;
+    const scale = viewBox.w / rect.width; // current SVG units per CSS pixel
+    viewBox.x = panStartViewBox.x - (evt.clientX - panStartClient.x)*scale;
+    viewBox.y = panStartViewBox.y - (evt.clientY - panStartClient.y)*scale;
+    applyViewBox();
+  });
+  window.addEventListener('mouseup', function(){ panning = false; });
+})();
+
+// ---------- init ----------
+buildGrid();
+buildSwatches();
+
+// demo seed
+items.push({id: itemSeq++, sourceType:'vswr', type:'circle', center:{re:0,im:0}, radius:(2-1)/(2+1), label:'VSWR = 2', color: PALETTE[1], params:{vswr:2}});
+items.push({id: itemSeq++, sourceType:'point', type:'point', gamma: zToGamma(25/50, 30/50), label:'Z = 25+j30 \u03a9', color: PALETTE[3], params:{mode:'z', R:25, X:30, label:''}});
+colorIdx = 2;
+buildSwatches();
+renderAll();
+</script>
+</body>
+</html>
