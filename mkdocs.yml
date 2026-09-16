@@ -1,0 +1,42 @@
+site_name: Evan Gray — RF/EM Portfolio
+site_description: FM superheterodyne receiver build, tools, and RF theory notes
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+  features:
+    - navigation.tabs
+    - navigation.top
+    - navigation.instant
+    - toc.follow
+    - content.code.copy
+
+nav:
+  - Home: index.md
+  - FM Superhet: projects/fm-superhet/index.md
+  - Tools: tools/index.md
+  - Notes:
+      - Overview: notes/index.md
+      - Mixer Theory: notes/mixer-theory.md
+      - RF Measurement Parameters: notes/rf-measurement-parameters.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.arithmatex:
+      generic: true
+  - toc:
+      permalink: true
+  - attr_list
+  - md_in_html
+  - tables
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+  - javascripts/toc-numbering.js
+
+extra_css:
+  - stylesheets/extra.css
