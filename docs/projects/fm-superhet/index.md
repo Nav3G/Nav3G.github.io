@@ -1,3 +1,8 @@
+---
+hide:
+  - navigation
+---
+
 # FM Superheterodyne Receiver
 
 A full FM broadcast-band (88–108 MHz) superheterodyne receiver. The core blocks are: RF preselector, LO + mixer, IF diplexer + IF amplifiers, FM detector, audio stage. 

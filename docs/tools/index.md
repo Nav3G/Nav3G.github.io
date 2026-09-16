@@ -1,3 +1,8 @@
+---
+hide:
+  - navigation
+---
+
 # Tools
 
 Interactive utilities built for these projects.

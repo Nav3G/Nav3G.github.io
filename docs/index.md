@@ -1,3 +1,8 @@
+---
+hide:
+  - navigation
+---
+
 <div class="hero">
   <h1 class="hero-title">Building an FM superheterodyne receiver, by hand, from first principles.</h1>
   <p class="hero-sub">Evan Gray — incoming MSEE, UCLA ECE (electromagnetics, antennas, RF/microwave). A record of the circuits, the math behind them, and the tools built along the way.</p>
